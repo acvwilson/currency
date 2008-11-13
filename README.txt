@@ -1,6 +1,6 @@
 = Currency
 
-This is the rubyforge.com Currency package.
+This is the git@cdscm Currency package.
 
 == Installation
 
@@ -21,7 +21,7 @@ See also: http://umleta.com/node/5
 
 == Home page
 
-* {Currency Home}[http://currency.rubyforge.org]
+* {Currency Home}[git@cdscm:currency.git]
 
 == Additional directories
 
