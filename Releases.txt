@@ -1,0 +1,155 @@
+= Currency Release History
+
+== Release 0.4.11: 2007/11/02
+
+CRITICAL FIXES
+
+* parser.rb - uncommitted typos.
+
+== Release 0.4.10: 2007/11/01
+
+CRITICAL FIXES
+
+* xe.rb - http://xe.com format change: Handle inline div in rates table.
+* bin/currency_historical_rate_load - script for pulling rates from sources into historical rate table.
+* exception.rb - Currency::Exception::Base can take Array with optional key/values.
+* exception.rb - Additional exception classes.
+* ALL - use raise instead of throw throughout.
+
+
+== Release 0.4.9: 2007/11/01
+
+** IGNORE THIS RELEASE**
+
+* Broken rubyforge config.
+
+== Release 0.4.7: 2007/06/25
+
+CRITICAL FIXES
+
+* NewYorkFed: CRITICAL FIX:
+
+  Rates for USDAUD, USDEUR, USDNZD and USDGBP were reciprocals.
+  See http://www.newyorkfed.org/markets/fxrates/noon.cfm
+
+* FederalReserve: Added support for historical rates from http://www.federalreserve.gov/releases/H10/hist
+* Provider#get_rate(): Return first rate immediately.
+* Rate::Writable for rate summary computation support.
+* Rate: collect_rate(): fixed rate_date_1.
+* Historical::Rate: to_rate(): takes optional class.
+* Historical::Rate: from_rate(): fixed rate_samples.
+
+== Release 0.4.6: 2007/05/29
+
+* NewYorkFed: changed FEXtime to FEXTIME.
+* Fixed Rate#collect_rates, source, rate_date_0, rate_date_1.
+
+== Release 0.4.5: 2007/05/29
+
+* Historical::Rate table name can be configured in Currency::Config.current.historical_table_name
+* Fixed Rate::Source::TheFinancials.
+* Examples: use Currency.Money(), not Currency::Money.new().
+
+== Release 0.4.4: 2007/04/01
+
+MAY NOT BE BACKWARDS-COMPATIBLE
+
+* Fixed TimedCache.
+* Updated documentation.
+* Added support for Parser#time = :now.
+* Added support for Time in Formatter and Parser using Time#xmlschema.
+* Money#inspect now appends Money#time, if set.
+
+== Release 0.4.3: 2007/04/01
+
+* Added available? checks for NewYorkFed.
+* Created new UnavailableRates exception for rate providers that return no rates (New York Fed on weekends).
+* Fixed xe.com rate dates.
+* Refactored exceptions.
+* Fixed comments.
+
+== Release 0.4.2: 2007/03/11
+
+* Missing Manifest changes
+* Missing Contributors
+
+== Release 0.4.1: 2007/03/10
+
+Some changes are not backwards-compatible
+
+* Fixed Rate::Source::Xe; site format changed, more robust parser.
+* Added Currency::Config.
+* Support for filtering Float values before casting to Money, based on suggestions for rounding by Steffen Rusitschka.
+* Fixed :allow_nil in ActiveRecord money macro based on fix by Steffen Rusitschka.
+* Fixed package scoping issue in Money.
+* Added support for Formatter#template string
+* Money format template default changed to '#{code}#{code && " "}#{symbol}#{sign}#{whole}#{fraction}'.  THIS MAY BREAK EXISTING CLIENTS.  See http://www.jhall.demon.co.uk/currency/ for rationale.
+
+== Release 0.4.0: 2007/02/21
+
+=== MAJOR CHANGES IN THIS RELEASE FOR HISTORICAL RATE DATA
+
+Some changes are not backwards-compatible
+
+* ActiveRecord::Base.money macro is deprecated, use ActiveRecord::Base.attr_money macro.
+* Currency::Exchange is now Currency::Exchange::Rate::Source
+  NOTE: Currency::Exchange::* is reserved for buying/selling currencies, not for providing rate data.
+* Refactored xe.com homepage rate source as a Currency::Exchange::Rate::Source::Xe.
+* Refactored Currency::Exchange::Test as Currency::Exchange::Rate::Source::Test.
+* Support for historical money values and rates using ActiveRecord.
+* Added Rate::Source::Historical::Writer.
+* Added newyorkfed.org XML rate source.
+* Added thefinancials.com XML rate source.
+* Refactored rate deriviation into Currency::Exchange::Rate::Deriver.
+* Refactored rate caching into Currency::Exchange::Rate::Source::TimedCache.
+* Added Money attribute macros for classes not using ActiveRecord.
+* Refactored time-based rate caching into Currency::Exchange::Rate::Source::TimedCache.
+* Refactored Currency::Currency#format into Currency::Formatter.  
+  NOTE: old formatting options as :no_* no longer supported.
+* Refactored Currency::Currency#parse into Currency::Parser.
+* Currency::CurrencyFactory is now Currency::Currency::Factory.
+* Preliminary Currency::Exchange::Rate::Source::Failover.
+* Added copyright notices: LICENSE.txt, COPYING.txt.
+
+== Release 0.3.3: 2006/10/31
+
+* Inclusion of README.txt and Releases.txt into documentation.
+
+== Release 0.3.2: 2006/10/31
+
+* BOO!
+* Added expiration of rates in Xe.
+* Fixed Currency.symbol formatting when Currency.symbol.nil?
+* Added more Money tests.
+
+== Release 0.3.1: 2006/10/31
+
+* Remove debug puts.
+
+== Release 0.3.0: 2006/10/31
+
+* ActiveRecord money :*_field options are now named :*_column.
+* More ActiveRecord tests
+
+== Release 0.2.1: 2006/10/31
+
+* Fixed Manifest.txt
+
+== Release 0.2.0: 2006/10/31
+
+* Restructured namespace
+* Added more documentation
+* Added ActiveRecord tests
+
+== Release 0.1.2: 2006/10/30
+
+* Rakefile now uses Hoe
+
+== Release 0.1.1: 2006/10/30
+
+* Fixes gem packaging errors.
+
+== Release 0.1.0: 2006/10/29
+
+* Initial Release
+

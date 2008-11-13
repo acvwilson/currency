@@ -1,0 +1,9 @@
+
+= Currency To Do List
+
+* Clean up and normalize all exceptions:
+** Rate sources should add :source => source, etc.
+* Refactor all configuration class variables into Currency::Config
+* Refactor all cached values into objects that can be reinstantiated on a per-thread basis
+* Support http://www.xe.com/ucc/full.php rate queries.
+

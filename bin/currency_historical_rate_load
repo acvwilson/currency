@@ -1,0 +1,105 @@
+#!/usr/bin/env ruby
+# -*- ruby -*-
+
+# Dependencies
+bin_dir = File.dirname(__FILE__)
+$:.unshift File.expand_path(bin_dir + "/../lib")
+
+require 'rubygems'
+
+gem 'activesupport'
+gem 'activerecord'
+
+require 'active_record'
+
+require 'currency'
+require 'currency/exchange/rate/source/historical/rate_loader'
+require 'optparse'
+require 'ostruct'
+require 'yaml'
+
+
+# Parse command line arguments.
+opts = { }
+opts[:db_config] = bin_dir + '/.db_config.yml'
+opts[:rate_sources] = [ ]
+opts[:required_currencies] = 
+  [
+   :USD,
+   :GBP,
+   :CAD,
+   :EUR,
+  ]
+opts[:RAILS_ENV] = ENV["RAILS_ENV"] || 'development'
+
+
+op = OptionParser.new do | op |
+  op.banner = "currency_historical_rate_load - loads currency rates from sources into historical rates table"
+  op.separator "Usage:"
+  op.on("--deploy-table",
+        TrueClass,
+        "If true the database table will be created."
+        ) do | v |
+    opts[:deploy_table] = v
+  end
+  op.on("-d",
+        "--db-config FILE",
+        String,
+        "The YAML file containing the ActiveRecord::Base database configuration."
+        ) do | v |
+    opts[:db_config] = v
+  end
+  op.on("-e",
+        "--rails-env ENV",
+        String,
+        "The configuration key to use from the --db-config file; default #{opts[:RAILS_ENV].inspect}."
+        ) do | v |
+    opts[:RAILS_ENV] = v
+  end
+  op.on("-s",
+        "--rate-source RATE_SOURCE",
+        String,
+        "The rate source to be queried."
+        ) do | v |
+    opts[:rate_sources] += v.split(/[\s,]+/)
+  end
+  op.on("-c",
+        "--currencies CURRENCY",
+        String,
+        "The required currencies; default: #{opts[:required_currencies].inspect}."
+        ) do | v |
+    opts[:required_currencies] = v.split(/[\s,]+/)
+  end
+  op.on("-h",
+        "--help",
+        "Show this message") do 
+    STDERR.puts op.to_s
+    exit(1)
+  end
+end
+
+args = ARGV.dup
+op.parse!(args)
+
+# Setup the database environment.
+db_config = File.open(opts[:db_config]) do | fh | 
+  YAML::load(fh)
+end
+db_config.freeze
+db_config = db_config[opts[:RAILS_ENV]] || raise("Cannot locate #{opts[:RAILS_ENV].inspect} in --db-config; available environments: #{db_config.keys.sort.inspect}")
+db_config.freeze
+ActiveRecord::Base.establish_connection(db_config)
+
+# Deploy table?
+if opts[:deploy_table]
+  require 'active_record/migration'
+  Currency::Exchange::Rate::Source::Historical::Rate.__create_table(ActiveRecord::Migration)
+end
+
+# Start Loading Rates.
+instance = Currency::Exchange::Rate::Source::Historical::RateLoader.new(opts)
+instance.run
+
+# Finished
+exit(0)
+
