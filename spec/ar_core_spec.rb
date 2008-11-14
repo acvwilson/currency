@@ -1,6 +1,10 @@
 # Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
 # See LICENSE.txt for details.
 
+
+# =================================================================
+# = TODO: IS THIS STUFF ACTUALLY NEEDED? IF SO, MOVE TO AR HELPER =
+# =================================================================
 require 'test/ar_test_base'
 
 module Currency

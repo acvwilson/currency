@@ -228,7 +228,15 @@ class Currency::Formatter
     fraction = x[currency.format_right .. -1]
     
     # Round the fraction to the supplied number of decimal places
-    fraction = ((fraction.to_f / currency.scale).round(@decimals) * (10 ** @decimals)).to_i.to_s
+    fraction = (fraction.to_f / currency.scale).round(@decimals).to_s[2..-1]
+    # raise "decimals: #{@decimals}, scale_exp: #{currency.scale_exp}, x is: #{x.inspect}, currency.scale_exp is #{currency.scale_exp.inspect}, fraction: #{fraction.inspect}"
+    while ( fraction.length < @decimals )
+      fraction = fraction + "0" 
+    end
+    
+    
+    # raise "x is: #{x.inspect}, currency.scale_exp is #{currency.scale_exp.inspect}, fraction: #{fraction.inspect}"
+    # fraction = ((fraction.to_f / currency.scale).round(decimals) * (10 ** decimals)).to_i.to_s
     
     # Do thousands.
     x = whole
@@ -285,6 +293,8 @@ class Currency::Formatter
   #     => "1,234,567.89 USD"
   #
   def format(m, opt = @@empty_hash)
+    # raise "huh: #{opt.inspect}"
+    
     fmt = self
 
     unless opt.empty? 

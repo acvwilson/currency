@@ -237,6 +237,8 @@ class Currency::Money
 
     # Formats the Money value as a String.
     def to_s(*opt)
+      # raise "huh: #{opt.inspect}"
+      
       @currency.format(self, *opt)
     end
 

@@ -129,7 +129,7 @@ class Currency::Currency
     # Formats the Money value as a string using the current Formatter.
     # See Currency::Formatter#format.
     def format(m, *opt)
-       formatter_or_default.format(m, *opt)
+      formatter_or_default.format(m, *opt)
     end
 
 

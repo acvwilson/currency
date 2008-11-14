@@ -1,17 +1,19 @@
 # Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
 # See LICENSE.txt for details.
 
-require 'test/ar_test_core'
-require 'currency'
+# require 'test/ar_test_core'
+# require 'currency'
+# 
+# require 'rubygems'
+# require 'active_record'
+# require 'active_record/migration'
+# require 'currency/active_record'
 
-require 'rubygems'
-require 'active_record'
-require 'active_record/migration'
-require 'currency/active_record'
+require File.dirname(__FILE__) + '/ar_spec_helper'
 
-module Currency
-
-class ArFieldTest < ArTestCore
+# module Currency
+# 
+# class ArFieldTest < ArTestCore
 
   ##################################################
   # Basic CurrenyTest AR::B class
@@ -40,30 +42,35 @@ class ArFieldTest < ArTestCore
 
   ##################################################
 
-  before do
-    @currency_test_migration ||= CurrencyColumnTestMigration 
-    @currency_test ||= CurrencyColumnTest
-    super
-  end
 
-  def teardown
-    super
-  end
+  # def teardown
+  #   super
+  # end
 
   ##################################################
 
+describe "ActiveRecord macros" do
+  before(:all) do
+    AR_B.establish_connection(database_spec)
+    @currency_test_migration ||= CurrencyColumnTestMigration 
+    @currency_test ||= CurrencyColumnTest
+    # schema_down
+    schema_up
+  end
+  
+  after(:all) do
+    # schema_down
+  end
 
   it "field" do
     insert_records
 
-    usd = @currency_test.find(@usd.id).should.not == nil
+    usd = @currency_test.find(@usd.id)
+    usd.should_not be_nil
     assert_equal_currency usd, @usd
 
-    cad = @currency_test.find(@cad.id).should.not == nil
+    cad = @currency_test.find(@cad.id)
+    cad.should_not be_nil
     assert_equal_currency cad, @cad
   end
-
 end
-
-end # module
-

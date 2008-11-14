@@ -16,6 +16,28 @@ rake announce
 #################################################################
 
 require 'rubygems'
+require 'spec/rake/spectask'
+require 'rake/rdoctask'
+
+desc 'Default: run specs.'
+task :default => :spec
+Rake::Task[:default].prerequisites.clear
+
+desc 'Run specs'
+Spec::Rake::SpecTask.new(:spec) do |t|
+  t.libs << 'lib'
+  t.pattern = 'spec/**/*_spec.rb'
+  t.verbose = true
+end
+
+desc 'Generate documentation'
+Rake::RDocTask.new(:rdoc) do |rdoc|
+  rdoc.rdoc_dir = 'doc'
+  rdoc.title    = 'Currency'
+  rdoc.options << '--line-numbers' << '--inline-source'
+  rdoc.rdoc_files.include('README.txt')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
 
 #################################################################
 # Release notes
