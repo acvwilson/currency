@@ -13,6 +13,6 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://currency.rubyforge.org/}
   s.rdoc_options = ["--main", "README.txt"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.0}
+  s.rubygems_version = %q{1.2.0}
   s.summary = %q{currency 0.5.0}
 end
