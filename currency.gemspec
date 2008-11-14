@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name = %q{acvwilson-currency}
+  s.name = %q{currency}
   s.version = "0.5.0"
  
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
@@ -14,5 +14,5 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--main", "README.txt"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.0}
-  s.summary = %q{acvwilson-currency 0.5.0}
+  s.summary = %q{currency 0.5.0}
 end
