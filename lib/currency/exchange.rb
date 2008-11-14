@@ -1,8 +1,6 @@
 # Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
 # See LICENSE.txt for details.
 
-require 'currency'
-
 # The Currency::Exchange package is responsible for
 # the buying and selling of currencies.
 #

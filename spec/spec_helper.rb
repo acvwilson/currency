@@ -2,8 +2,10 @@
 # See LICENSE.txt for details.
 
 require 'spec'
-require 'currency'
-require 'currency/exchange/rate/source/test'
+require File.dirname(__FILE__) + '/../lib/currency'
+require File.dirname(__FILE__) + '/../lib/currency/exchange/rate/source/test'
+
+# require 'currency/exchange/rate/source/test'
 
 def setup
   rate_source ||= get_rate_source
