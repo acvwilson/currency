@@ -15,28 +15,28 @@ describe Currency::Money do
       m = 1.99.money(:USD)
       m.should be_kind_of(Currency::Money)
       :USD.should == m.currency.code
-      19900.should == m.rep
+      m.rep.should == 1990000
     end
 
     it "works with a FixNum" do
       m = 199.money(:CAD)
       m.should be_kind_of(Currency::Money)
       :CAD.should == m.currency.code
-      1990000.should == m.rep
+      m.rep.should == 199000000
     end
 
     it "works with a string" do
       m = "13.98".money(:CAD)
       m.should be_kind_of(Currency::Money)
       :CAD.should == m.currency.code
-      139800.should == m.rep
+      m.rep.should == 13980000
     end
 
     it "works with a string again" do
       m = "45.99".money(:EUR)
       m.should be_kind_of(Currency::Money)
       :EUR.should == m.currency.code
-      459900.should == m.rep
+      m.rep.should == 45990000
     end
   end
 
@@ -110,25 +110,25 @@ describe Currency::Money do
   it "rep" do
     m = Currency::Money.new(123, :USD)
     m.should_not == nil
-    m.rep.should == 1230000
+    m.rep.should == 123000000
     
     m = Currency::Money.new(123.45, :USD)
     m.should_not == nil
-    m.rep.should == 1234500
+    m.rep.should == 123450000
 
     m = Currency::Money.new("123.456", :USD)
     m.should_not == nil
-    m.rep.should == 1234560
+    m.rep.should == 123456000
   end
 
   it "convert" do
     m = Currency::Money.new("123.456", :USD)
     m.should_not == nil
-    m.rep.should == 1234560
+    m.rep.should == 123456000
 
     m.to_i.should == 123
     m.to_f.should == 123.456
-    m.to_s.should == "$123.4560"
+    m.to_s.should == "$123.456000"
   end
 
   it "eql" do
@@ -192,31 +192,31 @@ describe Currency::Money do
     
     it "handle negative money" do
       # - Currency::Money => Currency::Money
-      (- @usd).rep.should == -1234500
+      (- @usd).rep.should == -123450000
       (- @usd).currency.code.should == :USD
 
-      (- @cad).rep.should == -1234500
+      (- @cad).rep.should == -123450000
       (- @cad).currency.code.should == :CAD
     end
     
     it "should add monies of the same currency" do
       m = (@usd + @usd)
       m.should be_kind_of(Currency::Money)
-      m.rep.should == 2469000
+      m.rep.should == 246900000
       m.currency.code.should == :USD
     end
     
     it "should add monies of different currencies and return USD" do
       m = (@usd + @cad)
       m.should be_kind_of(Currency::Money)
-      m.rep.should == 2288907
+      m.rep.should == 228890724
       m.currency.code.should == :USD
     end
     
     it "should add monies of different currencies and return CAD" do
       m = (@cad + @usd)
       m.should be_kind_of(Currency::Money) 
-      m.rep.should == 2679852
+      m.rep.should == 267985260
       m.currency.code.should == :CAD
     end
     
@@ -230,28 +230,28 @@ describe Currency::Money do
     it "should subtract monies of different currencies and return USD" do
       m = (@usd - @cad)
       m.should be_kind_of(Currency::Money) 
-      m.rep.should == 180093
+      m.rep.should == 18009276
       m.currency.code.should == :USD
     end
     
     it "should subtract monies of different currencies and return CAD" do
       m = (@cad - @usd)
       m.should be_kind_of(Currency::Money) 
-      m.rep.should == -210852
+      m.rep.should == -21085260
       m.currency.code.should == :CAD
     end
     
     it "should multiply by numerics and return money" do
       m = (@usd * 0.5)
       m.should be_kind_of(Currency::Money)
-      m.rep.should == 617250
+      m.rep.should == 61725000
       m.currency.code.should == :USD
     end
     
     it "should divide by numerics and return money" do
       m = @usd / 3
       m.should be_kind_of(Currency::Money)
-      m.rep.should == 411500
+      m.rep.should == 41150000
       m.currency.code.should == :USD
     end
     

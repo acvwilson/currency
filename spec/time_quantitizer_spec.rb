@@ -1,29 +1,65 @@
-# Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
-# See LICENSE.txt for details.
+require File.dirname(__FILE__) + '/spec_helper'
 
-#require File.dirname(__FILE__) + '/../test_helper'
+describe Currency::Exchange::TimeQuantitizerTest do
 
-require 'test/test_base'
-require 'currency/exchange/time_quantitizer'
+  def assert_test_day(t0)
+    tq = test_create
 
-module Currency
-module Exchange
+    begin
+      t1 = tq.quantitize_time(t0).should_not == nil
+      #$stderr.puts "t0 = #{t0}"
+      #$stderr.puts "t1 = #{t1}"
+      
+      t1.year.should == t0.year
+      t1.month.should == t0.month
+      t1.day.should == t0.day
+      assert_time_beginning_of_day(t1)
+    rescue Object => err
+      raise("#{err}\nDuring quantitize_time(#{t0} (#{t0.to_i}))")
+    end
 
-class TimeQuantitizerTest < TestBase
-  before do
-    super
+    t1
+  end
+  
+  def assert_test_minute(t0)
+    tq = TimeQuantitizer.new(:time_quant_size => 60) # 1 minute
+
+    tq.local_timezone_offset
+
+    t1 = tq.quantitize_time(t0).should_not == nil
+    $stderr.puts "t0 = #{t0}"
+    $stderr.puts "t1 = #{t1}"
+
+    t1.year.should == t0.year
+    t1.month.should == t0.month
+    t1.day.should == t0.day
+    assert_time_beginning_of_day(t1)
+
+    t1
   end
 
-  ############################################
-  # 
-  #
+
+  def assert_time_beginning_of_day(t1)
+    t1.hour.should == 0
+    assert_time_beginning_of_hour(t1)
+  end
+
+
+  def assert_time_beginning_of_hour(t1)
+    t1.min.should == 0
+    assert_time_beginning_of_min(t1)
+  end
+
+
+  def assert_time_beginning_of_min(t1)
+    t1.sec.should == 0
+  endshould_not
 
   it "create" do
-    assert_kind_of TimeQuantitizer, tq = TimeQuantitizer.new()
+    tq = TimeQuantitizer.new()
+    tg.should be_kind_of(TimeQuantitizer) 
     tq.time_quant_size.should == 60 * 60 * 24
     tq.quantitize_time(nil).should == nil
-
-    tq
   end
 
 
@@ -59,30 +95,10 @@ class TimeQuantitizerTest < TestBase
   end
 
 
-  def assert_test_day(t0)
-    tq = test_create
-
-    begin
-      t1 = tq.quantitize_time(t0).should.not == nil
-      #$stderr.puts "t0 = #{t0}"
-      #$stderr.puts "t1 = #{t1}"
-      
-      t1.year.should == t0.year
-      t1.month.should == t0.month
-      t1.day.should == t0.day
-      assert_time_beginning_of_day(t1)
-    rescue Object => err
-      raise("#{err}\nDuring quantitize_time(#{t0} (#{t0.to_i}))")
-    end
-
-    t1
-  end
-
-
   def assert_test_hour(t0)
     tq = TimeQuantitizer.new(:time_quant_size => 60 * 60) # 1 hour
 
-    t1 = tq.quantitize_time(t0).should.not == nil
+    t1 = tq.quantitize_time(t0).should_not == nil
     #$stderr.puts "t0 = #{t0}"
     #$stderr.puts "t1 = #{t1}"
 
@@ -94,43 +110,6 @@ class TimeQuantitizerTest < TestBase
     t1
   end
 
-
-  def assert_test_minute(t0)
-    tq = TimeQuantitizer.new(:time_quant_size => 60) # 1 minute
-
-    tq.local_timezone_offset
-
-    t1 = tq.quantitize_time(t0).should.not == nil
-    $stderr.puts "t0 = #{t0}"
-    $stderr.puts "t1 = #{t1}"
-
-    t1.year.should == t0.year
-    t1.month.should == t0.month
-    t1.day.should == t0.day
-    assert_time_beginning_of_day(t1)
-
-    t1
-  end
-
-
-  def assert_time_beginning_of_day(t1)
-    t1.hour.should == 0
-    assert_time_beginning_of_hour(t1)
-  end
-
-
-  def assert_time_beginning_of_hour(t1)
-    t1.min.should == 0
-    assert_time_beginning_of_min(t1)
-  end
-
-
-  def assert_time_beginning_of_min(t1)
-    t1.sec.should == 0
-  end
-
 end # class
-end # module
-end # module
 
 

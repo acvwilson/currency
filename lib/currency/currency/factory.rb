@@ -60,19 +60,19 @@ class Currency::Currency::Factory
 	# $stderr.puts "load('USD')"
         currency.code = :USD
         currency.symbol = '$'
-        currency.scale = 10000
+        currency.scale = 1000000
       elsif currency.code == :CAD
         # $stderr.puts "load('CAD')"
         currency.symbol = '$'
-        currency.scale = 10000
+        currency.scale = 1000000
       elsif currency.code == :EUR
         # $stderr.puts "load('CAD')"
         currency.symbol = nil
         currency.symbol_html = '&#8364;'
-        currency.scale = 10000
+        currency.scale = 1000000
       else
         currency.symbol = nil
-        currency.scale = 10000
+        currency.scale = 1000000
       end
   
       # $stderr.puts "AFTER: load(#{currency.inspect})"
