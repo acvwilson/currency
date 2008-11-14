@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.description = %q{Currency conversions for Ruby}
   s.email = ["acvwilson@gmail.com"]
   s.extra_rdoc_files = ['ChangeLog', *Dir.glob(File.join(File.dirname(__FILE__), '*.txt')).map {|f| f[2..-1]}]
-  s.files = [Dir.glob(File.join(File.dirname(__FILE__), '**/*.*')).map {|f| f[2..-1]}]
+  s.files = [*Dir.glob(File.join(File.dirname(__FILE__), '**/*.*')).map {|f| f[2..-1]}]
   s.has_rdoc = true
   s.homepage = %q{http://currency.rubyforge.org/}
   s.rdoc_options = ["--main", "README.txt"]
