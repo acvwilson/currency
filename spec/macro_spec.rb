@@ -46,7 +46,7 @@ class MacroTest < TestBase
 
   it "read money" do
     assert_kind_of  Record, r = Record.new
-    r.gross = 10.00.should.not == nil
+    r.gross = 10.00.should_not == nil
     r.gross.should == r.gross_money.to_f
     r.currency.should == r.gross_money.currency.code
     r.date.should == r.gross_money.time
@@ -57,7 +57,7 @@ class MacroTest < TestBase
 
   it "write money rep" do
     assert_kind_of  Record, r = Record.new
-    r.gross_money = 10.00.should.not == nil
+    r.gross_money = 10.00.should_not == nil
     r.gross.should == r.gross_money.to_f
     r.currency.should == r.gross_money.currency.code
     r.date.should == r.gross_money.time
@@ -69,20 +69,20 @@ class MacroTest < TestBase
   it "money cache" do
     r = test_read_money
 
-    r_gross = r.gross.should.not == nil
+    r_gross = r.gross.should_not == nil
     r_gross.object_id.should == r.gross.object_id
 
     # Cache flush
-    r.gross = 12.00.should.not == nil
+    r.gross = 12.00.should_not == nil
     r.gross.should == r.gross_money.to_f
-    r_gross.object_id != r.gross.object_id.should.not == nil
+    r_gross.object_id != r.gross.object_id.should_not == nil
   end
 
 
   it "currency" do
     r = test_read_money
 
-    r.gross_money.currency.should.not == nil
+    r.gross_money.currency.should_not == nil
     r.currency.should == r.gross_money.currency.code
     
   end
@@ -90,8 +90,8 @@ class MacroTest < TestBase
 
   it "compute" do
     assert_kind_of  Record, r = Record.new
-    r.gross = 10.00.should.not == nil
-    r.tax = 1.50.should.not == nil
+    r.gross = 10.00.should_not == nil
+    r.tax = 1.50.should_not == nil
     r.compute_net
 
     r.net.should == 8.50

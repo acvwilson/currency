@@ -28,12 +28,12 @@ class TimedCacheTest < TestBase
 
 
   it "timed cache usd cad" do
-    rates = @source.raw_rates.should.not == nil
-    rates[:USD].should.not == nil
-    usd_cad = rates[:USD][:CAD].should.not == nil
+    rates = @source.raw_rates.should_not == nil
+    rates[:USD].should_not == nil
+    usd_cad = rates[:USD][:CAD].should_not == nil
 
-    usd = Money.new(123.45, :USD).should.not == nil
-    cad = usd.convert(:CAD).should.not == nil
+    usd = Money.new(123.45, :USD).should_not == nil
+    cad = usd.convert(:CAD).should_not == nil
 
     assert_kind_of Numeric, m = (cad.to_f / usd.to_f)
     # $stderr.puts "m = #{m}"
@@ -42,13 +42,13 @@ class TimedCacheTest < TestBase
 
 
   it "timed cache cad eur" do
-    rates = @source.raw_rates.should.not == nil
-    rates[:USD].should.not == nil
-    usd_cad = rates[:USD][:CAD].should.not == nil
-    usd_eur = rates[:USD][:EUR].should.not == nil
+    rates = @source.raw_rates.should_not == nil
+    rates[:USD].should_not == nil
+    usd_cad = rates[:USD][:CAD].should_not == nil
+    usd_eur = rates[:USD][:EUR].should_not == nil
 
-    cad = Money.new(123.45, :CAD).should.not == nil
-    eur = cad.convert(:EUR).should.not == nil
+    cad = Money.new(123.45, :CAD).should_not == nil
+    eur = cad.convert(:EUR).should_not == nil
 
     assert_kind_of Numeric, m = (eur.to_f / cad.to_f)
     # $stderr.puts "m = #{m}"
@@ -61,32 +61,32 @@ class TimedCacheTest < TestBase
 
     test_timed_cache_cad_eur
 
-    rates = @source.raw_rates.should.not == nil
-    rates[:USD].should.not == nil
-    usd_cad_1 = rates[:USD][:CAD].should.not == nil
+    rates = @source.raw_rates.should_not == nil
+    rates[:USD].should_not == nil
+    usd_cad_1 = rates[:USD][:CAD].should_not == nil
 
-    t1 = @cache.rate_load_time.should.not == nil
-    t1_reload = @cache.rate_reload_time.should.not == nil
+    t1 = @cache.rate_load_time.should_not == nil
+    t1_reload = @cache.rate_reload_time.should_not == nil
     t1_reload.to_i.should > t1.to_i
 
     @cache.time_to_live = 5
     @cache.time_to_live_fudge = 0
 
     # puts @cache.rate_reload_time.to_i - @cache.rate_load_time.to_i
-    @cache.rate_reload_time.to_i - @cache.rate_load_time.to_i == @cache.time_to_live.should.not == nil
+    @cache.rate_reload_time.to_i - @cache.rate_load_time.to_i == @cache.time_to_live.should_not == nil
 
     sleep 10
 
     test_timed_cache_cad_eur
     
-    t2 = @cache.rate_load_time.should.not == nil
-    t1.to_i != t2.to_i.should.not == nil
+    t2 = @cache.rate_load_time.should_not == nil
+    t1.to_i != t2.to_i.should_not == nil
 
-    rates = @source.raw_rates.should.not == nil
-    rates[:USD].should.not == nil
-    usd_cad_2 = rates[:USD][:CAD].should.not == nil
+    rates = @source.raw_rates.should_not == nil
+    rates[:USD].should_not == nil
+    usd_cad_2 = rates[:USD][:CAD].should_not == nil
 
-    usd_cad_1.object_id != usd_cad_2.object_id.should.not == nil
+    usd_cad_1.object_id != usd_cad_2.object_id.should_not == nil
   end
 
 end

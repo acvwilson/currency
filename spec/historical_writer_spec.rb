@@ -49,8 +49,8 @@ class HistoricalWriterTest < ArTestBase
 
   
   it "writer" do
-    src = @src.should.not == nil
-    writer = Exchange::Rate::Source::Historical::Writer.new().should.not == nil
+    src = @src.should_not == nil
+    writer = Exchange::Rate::Source::Historical::Writer.new().should_not == nil
     writer.time_quantitizer = :current
     writer.required_currencies = [ :USD, :GBP, :EUR, :CAD ]
     writer.base_currencies = [ :USD ]
@@ -67,9 +67,9 @@ class HistoricalWriterTest < ArTestBase
     writer = test_writer
     writer.source = @src
     rates = writer.write_rates
-    rates.should.not == nil
+    rates.should_not == nil
     rates.size.should > 0
-    12, rates.size.should.not == nil
+    12, rates.size.should_not == nil
     assert_h_rates(rates, writer)
   end
 
@@ -79,7 +79,7 @@ class HistoricalWriterTest < ArTestBase
     writer.source = @src2
     return unless writer.source.available?
     rates = writer.write_rates
-    rates.should.not == nil
+    rates.should_not == nil
     rates.size.should > 0
     rates.size.should == 12
     assert_h_rates(rates, writer)
@@ -87,8 +87,8 @@ class HistoricalWriterTest < ArTestBase
 
 
   def xxx_test_required_failure
-    writer = Exchange::Rate::Source::Historical::Writer.new().should.not == nil
-    src = @src.should.not == nil
+    writer = Exchange::Rate::Source::Historical::Writer.new().should_not == nil
+    src = @src.should_not == nil
     writer.source = src
     writer.required_currencies = [ :USD, :GBP, :EUR, :CAD, :ZZZ ]
     writer.preferred_currencies = writer.required_currencies
@@ -106,33 +106,33 @@ class HistoricalWriterTest < ArTestBase
     deriver = Exchange::Rate::Deriver.new(:source => source)
     Exchange::Rate::Source.default = deriver
 
-    rates = source.get_raw_rates.should.not == nil
-     rates.empty?.should.not == true
+    rates = source.get_raw_rates.should_not == nil
+     rates.empty?.should_not == true
     # $stderr.puts "historical rates = #{rates.inspect}"
 
-    rates = source.get_rates.should.not == nil
-     rates.empty?.should.not == true
+    rates = source.get_rates.should_not == nil
+     rates.empty?.should_not == true
     # $stderr.puts "historical rates = #{rates.inspect}"
     
-    m_usd = ::Currency.Money('1234.56', :USD, :now).should.not == nil
+    m_usd = ::Currency.Money('1234.56', :USD, :now).should_not == nil
     # $stderr.puts "m_usd = #{m_usd.to_s(:code => true)}"
-    m_eur = m_usd.convert(:EUR).should.not == nil
+    m_eur = m_usd.convert(:EUR).should_not == nil
     # $stderr.puts "m_eur = #{m_eur.to_s(:code => true)}"
 
   end
 
 
   def assert_h_rates(rates, writer = nil)
-    hr0 = rates[0].should.not == nil
+    hr0 = rates[0].should_not == nil
     rates.each do | hr |
       found_hr = nil
       begin
-        found_hr = hr.find_matching_this(:first).should.not == nil
+        found_hr = hr.find_matching_this(:first).should_not == nil
       rescue Object => err
         raise "#{hr.inspect}: #{err}:\n#{err.backtrace.inspect}"
       end
 
-      hr0.should.not == nil
+      hr0.should_not == nil
 
       hr.date.should == hr0.date
       hr.date_0.should == hr0.date_0

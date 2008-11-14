@@ -40,12 +40,12 @@ class FederalReserveTest < TestBase
 
     # yesterday = Time.now.to_date - 1
 
-    rates = Exchange::Rate::Source.default.source.raw_rates.should.not == nil
+    rates = Exchange::Rate::Source.default.source.raw_rates.should_not == nil
     #assert_not_nil rates[:USD]
     #assert_not_nil usd_cad = rates[:USD][:CAD]
 
-    usd = Money.new(123.45, :USD).should.not == nil
-    cad = usd.convert(:CAD).should.not == nil
+    usd = Money.new(123.45, :USD).should_not == nil
+    cad = usd.convert(:CAD).should_not == nil
 
     # assert_kind_of Numeric, m = (cad.to_f / usd.to_f)
     # $stderr.puts "m = #{m}"
@@ -56,13 +56,13 @@ class FederalReserveTest < TestBase
   it "cad eur" do
     return unless available?
 
-    rates = Exchange::Rate::Source.default.source.raw_rates.should.not == nil
+    rates = Exchange::Rate::Source.default.source.raw_rates.should_not == nil
     #assert_not_nil rates[:USD]
     #assert_not_nil usd_cad = rates[:USD][:CAD]
     #assert_not_nil usd_eur = rates[:USD][:EUR]
 
-    cad = Money.new(123.45, :CAD).should.not == nil
-    eur = cad.convert(:EUR).should.not == nil
+    cad = Money.new(123.45, :CAD).should_not == nil
+    eur = cad.convert(:EUR).should_not == nil
 
     #assert_kind_of Numeric, m = (eur.to_f / cad.to_f)
     # $stderr.puts "m = #{m}"

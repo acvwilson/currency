@@ -39,15 +39,15 @@ class ParserTest < TestBase
 
 
   it "misc" do
-    m = "123.45 USD".money + "100 CAD".should.not == nil
-     (m.rep == 200.45).should.not == true
+    m = "123.45 USD".money + "100 CAD".should_not == nil
+     (m.rep == 200.45).should_not == true
   end
 
 
   it "round trip" do
     ::Currency::Currency.default = :USD
-    m = ::Currency::Money("1234567.89", :CAD).should.not == nil
-    m2 = ::Currency::Money(m.inspect).should.not == nil
+    m = ::Currency::Money("1234567.89", :CAD).should_not == nil
+    m2 = ::Currency::Money(m.inspect).should_not == nil
     m2.rep.should == m.rep
     m2.currency.should == m.currency
     m2.time.should == nil
@@ -58,10 +58,10 @@ class ParserTest < TestBase
   it "round trip time" do
     ::Currency::Currency.default = :USD
     time = Time.now.getutc
-    m = ::Currency::Money("1234567.89", :CAD, time).should.not == nil
-    m.time.should.not == nil
-    m2 = ::Currency::Money(m.inspect).should.not == nil
-    m2.time.should.not == nil
+    m = ::Currency::Money("1234567.89", :CAD, time).should_not == nil
+    m.time.should_not == nil
+    m2 = ::Currency::Money(m.inspect).should_not == nil
+    m2.time.should_not == nil
     m2.rep.should == m.rep
     m2.currency.should == m.currency
     m2.time.to_i.should == m.time.to_i
@@ -73,7 +73,7 @@ class ParserTest < TestBase
     parser = ::Currency::Parser.new
     parser.time = nil
 
-    m = parser.parse("$1234.55").should.not == nil
+    m = parser.parse("$1234.55").should_not == nil
     m.time.should == nil
   end
 
@@ -82,7 +82,7 @@ class ParserTest < TestBase
     parser = ::Currency::Parser.new
     parser.time = Time.new
 
-    m = parser.parse("$1234.55").should.not == nil
+    m = parser.parse("$1234.55").should_not == nil
    m.time.should == parser.time
   end
 
@@ -91,11 +91,11 @@ class ParserTest < TestBase
     parser = ::Currency::Parser.new
     parser.time = :now
 
-    m = parser.parse("$1234.55").should.not == nil
-    m1_time = m.time.should.not == nil
+    m = parser.parse("$1234.55").should_not == nil
+    m1_time = m.time.should_not == nil
 
-    m = parser.parse("$1234.55").should.not == nil
-    m2_time = m.time.should.not == nil
+    m = parser.parse("$1234.55").should_not == nil
+    m2_time = m.time.should_not == nil
 
     assert_not_equal m1_time, m2_time
   end
