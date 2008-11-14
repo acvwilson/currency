@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/spec_helper'
-
+# require File.dirname(__FILE__) + '/../lib/currency/formatter'
 
 describe Currency::Money do
 
@@ -37,14 +37,6 @@ describe Currency::Money do
       m.should be_kind_of(Currency::Money)
       :EUR.should == m.currency.code
       m.rep.should == 45990000
-    end
-    
-    it "creates money objects from strings" do
-       "12.0001".money(:USD).to_s.should == "$12.0001"
-       # "12.000108".money(:USD).to_s(:thousands => false, :decimals => 5).should == "$12.00011"
-       @money = Currency::Money.new_rep(1234567890000, :USD, nil)
-       
-       Currency::Money.new("12.000108").to_s(:thousands => false, :decimals => 5).should == "$12.00011"
     end
   end
 

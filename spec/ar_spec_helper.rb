@@ -105,10 +105,10 @@ def assert_equal_money(a,b)
   # Make sure a and b are not the same object.
   b.object_id.should_not == a.object_id
   b.id.should == a.id
-  a.amount.should.not == nil
-  a.amount.should be_kind_of(Money) 
-  b.amount.should.not == nil
-  b.amount.should be_kind_of(Money) 
+  a.amount.should_not == nil
+  a.amount.should be_kind_of(Currency::Money) 
+  b.amount.should_not == nil
+  b.amount.should be_kind_of(Currency::Money) 
   # Make sure that what gets stored in the database comes back out
   # when converted back to the original currency.
   b.amount.rep.should == a.amount.convert(b.amount.currency).rep
