@@ -5,8 +5,6 @@ require 'spec'
 require File.dirname(__FILE__) + '/../lib/currency'
 require File.dirname(__FILE__) + '/../lib/currency/exchange/rate/source/test'
 
-# require 'currency/exchange/rate/source/test'
-
 def setup
   rate_source ||= get_rate_source
   Currency::Exchange::Rate::Source.default = rate_source
