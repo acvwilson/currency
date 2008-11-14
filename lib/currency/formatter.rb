@@ -114,7 +114,7 @@ class Currency::Formatter
   
   # Set the decimal_places
   # Defaults to: nil
-  attr_accessor :decimal_places
+  attr_accessor :decimals
 
   # If passed true, formats for an input field (i.e.: as a number).
   def as_input_value=(x)
@@ -158,7 +158,7 @@ class Currency::Formatter
     @time_fractional_digits = 4
     @template = '#{code}#{code && " "}#{symbol}#{sign}#{whole}#{fraction}#{time && " "}#{time}'
     @template_object = nil
-    @decimal_places = nil
+    @decimals = nil
 
     opt.each_pair{ | k, v | self.send("#{k}=", v) }
   end
@@ -199,7 +199,7 @@ class Currency::Formatter
     time ||= m.time
     
     # set decimal places
-    @decimal_places ||= currency.scale_exp
+    @decimals ||= currency.scale_exp
 
     # Setup template
     tmpl = self.template_object.clone
@@ -228,7 +228,7 @@ class Currency::Formatter
     fraction = x[currency.format_right .. -1]
     
     # Round the fraction to the supplied number of decimal places
-    fraction = ((fraction.to_f / currency.scale).round(@decimal_places) * (10 ** @decimal_places)).to_i.to_s
+    fraction = ((fraction.to_f / currency.scale).round(@decimals) * (10 ** @decimals)).to_i.to_s
     
     # Do thousands.
     x = whole

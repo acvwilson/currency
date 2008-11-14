@@ -1,36 +1,23 @@
-# Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
-# See LICENSE.txt for details.
+require File.dirname(__FILE__) + '/spec_helper'
 
+describe Currency::Config do
 
-require 'test/test_base'
-require 'currency'
+  it "config" do
+    m = Currency::Money.new(1.999)
+    m.should be_kind_of(Currency::Money) 
+    m.rep.should == 19990
 
-module Currency
-
-class ConfigTest < TestBase
-  def setup
-    super
-  end
-
-  ############################################
-  # Simple stuff.
-  #
-
-  def test_config
-    assert_kind_of Money, m = Money.new(1.999)
-    assert_equal 199, m.rep
-
-    Config.configure do | c |
+    Currency::Config.configure do | c |
       c.float_ref_filter = Proc.new { | x | x.round }
 
-      assert_kind_of Money, m = Money.new(1.999)
-      assert_equal 200, m.rep
+      m = Currency::Money.new(1.99999999)
+      m.should be_kind_of(Currency::Money)
+      m.rep.should == 20000
     end
 
   end
 
 end # class
 
-end # module
 
 

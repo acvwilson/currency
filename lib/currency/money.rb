@@ -271,7 +271,8 @@ class Currency::Money
     def Money_rep(currency, time = nil)
       # Attempt conversion?
       if @currency != currency || (time && @time != time)
-	self.convert(currency, time).rep
+        
+        self.convert(currency, time).rep
         # raise ::Currency::Exception::Generic, "Incompatible Currency: #{@currency} != #{currency}"
       else
         @rep

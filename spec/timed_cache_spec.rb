@@ -10,7 +10,7 @@ require 'currency/exchange/rate/source/timed_cache'
 module Currency
 
 class TimedCacheTest < TestBase
-  def setup
+  before do
     super
   end
 
@@ -27,13 +27,13 @@ class TimedCacheTest < TestBase
   end
 
 
-  def test_timed_cache_usd_cad
-    assert_not_nil rates = @source.raw_rates
-    assert_not_nil rates[:USD]
-    assert_not_nil usd_cad = rates[:USD][:CAD]
+  it "timed cache usd cad" do
+    rates = @source.raw_rates.should.not == nil
+    rates[:USD].should.not == nil
+    usd_cad = rates[:USD][:CAD].should.not == nil
 
-    assert_not_nil usd = Money.new(123.45, :USD)
-    assert_not_nil cad = usd.convert(:CAD)
+    usd = Money.new(123.45, :USD).should.not == nil
+    cad = usd.convert(:CAD).should.not == nil
 
     assert_kind_of Numeric, m = (cad.to_f / usd.to_f)
     # $stderr.puts "m = #{m}"
@@ -41,14 +41,14 @@ class TimedCacheTest < TestBase
   end
 
 
-  def test_timed_cache_cad_eur
-    assert_not_nil rates = @source.raw_rates
-    assert_not_nil rates[:USD]
-    assert_not_nil usd_cad = rates[:USD][:CAD]
-    assert_not_nil usd_eur = rates[:USD][:EUR]
+  it "timed cache cad eur" do
+    rates = @source.raw_rates.should.not == nil
+    rates[:USD].should.not == nil
+    usd_cad = rates[:USD][:CAD].should.not == nil
+    usd_eur = rates[:USD][:EUR].should.not == nil
 
-    assert_not_nil cad = Money.new(123.45, :CAD)
-    assert_not_nil eur = cad.convert(:EUR)
+    cad = Money.new(123.45, :CAD).should.not == nil
+    eur = cad.convert(:EUR).should.not == nil
 
     assert_kind_of Numeric, m = (eur.to_f / cad.to_f)
     # $stderr.puts "m = #{m}"
@@ -56,37 +56,37 @@ class TimedCacheTest < TestBase
   end
 
 
-  def test_reload
+  it "reload" do
     # @cache.verbose = 5
 
     test_timed_cache_cad_eur
 
-    assert_not_nil rates = @source.raw_rates
-    assert_not_nil rates[:USD]
-    assert_not_nil usd_cad_1 = rates[:USD][:CAD]
+    rates = @source.raw_rates.should.not == nil
+    rates[:USD].should.not == nil
+    usd_cad_1 = rates[:USD][:CAD].should.not == nil
 
-    assert_not_nil t1 = @cache.rate_load_time
-    assert_not_nil t1_reload = @cache.rate_reload_time
-    assert t1_reload.to_i > t1.to_i
+    t1 = @cache.rate_load_time.should.not == nil
+    t1_reload = @cache.rate_reload_time.should.not == nil
+    t1_reload.to_i.should > t1.to_i
 
     @cache.time_to_live = 5
     @cache.time_to_live_fudge = 0
 
     # puts @cache.rate_reload_time.to_i - @cache.rate_load_time.to_i
-    assert @cache.rate_reload_time.to_i - @cache.rate_load_time.to_i == @cache.time_to_live
+    @cache.rate_reload_time.to_i - @cache.rate_load_time.to_i == @cache.time_to_live.should.not == nil
 
     sleep 10
 
     test_timed_cache_cad_eur
     
-    assert_not_nil t2 = @cache.rate_load_time
-    assert t1.to_i != t2.to_i
+    t2 = @cache.rate_load_time.should.not == nil
+    t1.to_i != t2.to_i.should.not == nil
 
-    assert_not_nil rates = @source.raw_rates
-    assert_not_nil rates[:USD]
-    assert_not_nil usd_cad_2 = rates[:USD][:CAD]
+    rates = @source.raw_rates.should.not == nil
+    rates[:USD].should.not == nil
+    usd_cad_2 = rates[:USD][:CAD].should.not == nil
 
-    assert usd_cad_1.object_id != usd_cad_2.object_id
+    usd_cad_1.object_id != usd_cad_2.object_id.should.not == nil
   end
 
 end

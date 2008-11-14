@@ -36,7 +36,7 @@ class ArTestCore < ArTestBase
   ##################################################
 
 
-  def setup
+  before do
     @currency_test_migration ||= CurrencyTestMigration 
     @currency_test           ||= CurrencyTest
     super
@@ -54,7 +54,7 @@ class ArTestCore < ArTestBase
   # 
   
 
-  def test_insert
+  it "insert" do
     insert_records
   end
 

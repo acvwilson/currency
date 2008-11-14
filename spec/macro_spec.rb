@@ -36,7 +36,7 @@ class MacroTest < TestBase
 
   end
 
-  def setup
+  before do
     super
   end
 
@@ -44,63 +44,63 @@ class MacroTest < TestBase
   # Tests
   #
 
-  def test_read_money
+  it "read money" do
     assert_kind_of  Record, r = Record.new
-    assert_not_nil  r.gross = 10.00
-    assert_equal    r.gross_money.to_f, r.gross
-    assert_equal    r.gross_money.currency.code, r.currency
-    assert_equal    r.gross_money.time, r.date
+    r.gross = 10.00.should.not == nil
+    r.gross.should == r.gross_money.to_f
+    r.currency.should == r.gross_money.currency.code
+    r.date.should == r.gross_money.time
 
     r
   end
 
 
-  def test_write_money_rep
+  it "write money rep" do
     assert_kind_of  Record, r = Record.new
-    assert_not_nil  r.gross_money = 10.00
-    assert_equal    r.gross_money.to_f, r.gross
-    assert_equal    r.gross_money.currency.code, r.currency
-    assert_equal    r.gross_money.time, r.date
+    r.gross_money = 10.00.should.not == nil
+    r.gross.should == r.gross_money.to_f
+    r.currency.should == r.gross_money.currency.code
+    r.date.should == r.gross_money.time
 
     r
   end
 
 
-  def test_money_cache
+  it "money cache" do
     r = test_read_money
 
-    assert_not_nil  r_gross = r.gross
-    assert          r_gross.object_id == r.gross.object_id
+    r_gross = r.gross.should.not == nil
+    r_gross.object_id.should == r.gross.object_id
 
     # Cache flush
-    assert_not_nil r.gross = 12.00
-    assert_equal   r.gross_money.to_f, r.gross
-    assert         r_gross.object_id != r.gross.object_id
+    r.gross = 12.00.should.not == nil
+    r.gross.should == r.gross_money.to_f
+    r_gross.object_id != r.gross.object_id.should.not == nil
   end
 
 
-  def test_currency
+  it "currency" do
     r = test_read_money
 
-    assert_not_nil  r.gross_money.currency
-    assert_equal    r.gross_money.currency.code, r.currency
+    r.gross_money.currency.should.not == nil
+    r.currency.should == r.gross_money.currency.code
     
   end
 
 
-  def test_compute
+  it "compute" do
     assert_kind_of  Record, r = Record.new
-    assert_not_nil  r.gross = 10.00
-    assert_not_nil  r.tax = 1.50
+    r.gross = 10.00.should.not == nil
+    r.tax = 1.50.should.not == nil
     r.compute_net
 
-    assert_equal    8.50, r.net
-    assert_equal    r.net, r.net_money.to_f
+    r.net.should == 8.50
+    r.net_money.to_f.should == r.net
 
     r.compute_net_money
 
-    assert_equal    8.50, r.net
-    assert_equal    r.net, r.net_money.to_f
+    r.net.should == 8.50
+    r.net_money.to_f.should == r.net
   end
 
 end # class

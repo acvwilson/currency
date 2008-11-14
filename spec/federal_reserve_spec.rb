@@ -9,7 +9,7 @@ require 'currency/exchange/rate/source/federal_reserve'
 module Currency
 
 class FederalReserveTest < TestBase
-  def setup
+  before do
     super
   end
 
@@ -35,17 +35,17 @@ class FederalReserveTest < TestBase
 
 
 
-  def test_usd_cad
+  it "usd cad" do
     return unless available?
 
     # yesterday = Time.now.to_date - 1
 
-    assert_not_nil rates = Exchange::Rate::Source.default.source.raw_rates
+    rates = Exchange::Rate::Source.default.source.raw_rates.should.not == nil
     #assert_not_nil rates[:USD]
     #assert_not_nil usd_cad = rates[:USD][:CAD]
 
-    assert_not_nil usd = Money.new(123.45, :USD)
-    assert_not_nil cad = usd.convert(:CAD)
+    usd = Money.new(123.45, :USD).should.not == nil
+    cad = usd.convert(:CAD).should.not == nil
 
     # assert_kind_of Numeric, m = (cad.to_f / usd.to_f)
     # $stderr.puts "m = #{m}"
@@ -53,16 +53,16 @@ class FederalReserveTest < TestBase
   end
 
 
-  def test_cad_eur
+  it "cad eur" do
     return unless available?
 
-    assert_not_nil rates = Exchange::Rate::Source.default.source.raw_rates
+    rates = Exchange::Rate::Source.default.source.raw_rates.should.not == nil
     #assert_not_nil rates[:USD]
     #assert_not_nil usd_cad = rates[:USD][:CAD]
     #assert_not_nil usd_eur = rates[:USD][:EUR]
 
-    assert_not_nil cad = Money.new(123.45, :CAD)
-    assert_not_nil eur = cad.convert(:EUR)
+    cad = Money.new(123.45, :CAD).should.not == nil
+    eur = cad.convert(:EUR).should.not == nil
 
     #assert_kind_of Numeric, m = (eur.to_f / cad.to_f)
     # $stderr.puts "m = #{m}"

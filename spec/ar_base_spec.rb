@@ -18,7 +18,7 @@ class ArTestBase < TestBase
 
   ##################################################
 
-  def setup
+  before do
     super
     AR_B.establish_connection(database_spec)
 
@@ -111,40 +111,29 @@ class ArTestBase < TestBase
 
 
   def assert_equal_money(a,b)
-    assert_not_nil a
-    assert_not_nil b
+    a.should_not be_nil
+    b.should_not be_nil
     # Make sure a and b are not the same object.
-    assert_not_equal a.object_id, b.object_id
-    assert_equal   a.id, b.id
-    assert_not_nil a.amount
-    assert_kind_of Money, a.amount
-    assert_not_nil b.amount
-    assert_kind_of Money, b.amount
+    b.object_id.should_not == a.object_id
+    b.id.should == a.id
+    a.amount.should.not == nil
+    a.amount.should be_kind_of(Money) 
+    b.amount.should.not == nil
+    b.amount.should be_kind_of(Money) 
     # Make sure that what gets stored in the database comes back out
     # when converted back to the original currency.
-    assert_equal   a.amount.convert(b.amount.currency).rep, b.amount.rep
+    b.amount.rep.should == a.amount.convert(b.amount.currency).rep
   end
 
 
   def assert_equal_currency(a,b)
     assert_equal_money a, b
 
-    assert_equal   a.amount.rep, b.amount.rep
-    assert_equal   a.amount.currency, b.amount.currency
-    assert_equal   a.amount.currency.code, b.amount.currency.code
+    b.amount.rep.should == a.amount.rep
+    b.amount.currency.should == a.amount.currency
+    b.amount.currency.code.should == a.amount.currency.code
 
   end
-
-
-  ##################################################
-  # 
-  # 
-
-  
-  def test_dummy
-    
-  end
-
 end
 
 end # module

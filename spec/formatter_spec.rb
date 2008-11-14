@@ -1,92 +1,72 @@
-# Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
-# See LICENSE.txt for details.
+require File.dirname(__FILE__) + '/spec_helper'
 
-require 'test/test_base'
-require 'currency'
-
-module Currency
-
-class FormatterTest < TestBase
-  def setup
-    super
+describe Currency::Formatter do
+  before(:each) do
+    @time = nil
+    @money = Currency::Money.new_rep(12345678900, :USD, @time)
+    
   end
 
-  ############################################
-  # Simple stuff.
-  #
-
-  def test_default(time = nil)
-    assert_kind_of Money, m = ::Currency::Money.new_rep(123456789, :USD, time)
-    assert_equal Currency.default, m.currency
-    assert_equal :USD, m.currency.code
-    assert_equal "$1,234,567.89", m.to_s
-    assert_equal time, m.time
-
-    m
+  it "can convert to string" do
+    @money.should be_kind_of(Currency::Money) 
+    @money.currency.should == Currency::Currency.default
+    @money.currency.code.should == :USD
+    @money.to_s.should == "$1,234,567.8900"
+    @money.time.should == @time
   end
 
 
-  def test_thousands
-    m = test_default
-    assert_equal "$1234567.89", m.to_s(:thousands => false)
-    assert_equal "$1,234,567.89", m.to_s(:thousands => true)
-
-    m
+  it "handles thousands options" do
+    @money.to_s(:thousands => false).should == "$1234567.8900"
+    @money.to_s(:thousands => true).should == "$1,234,567.8900"
   end
 
 
-  def test_cents
-    m = test_default
-    assert_equal "$1,234,567", m.to_s(:cents => false)
-    assert_equal "$1,234,567.89", m.to_s(:cents => true)
-
-    m
+  it "handles cents options" do
+    @money.to_s(:cents => false).should == "$1,234,567"
+    @money.to_s(:cents => true).should == "$1,234,567.8900"
   end
 
 
-  def test_symbol
-    m = test_default
-    assert_equal "1,234,567.89", m.to_s(:symbol => false)
-    assert_equal "$1,234,567.89", m.to_s(:symbol => true)
-
-    m
+  it "handles symbol options" do
+    @money.to_s(:symbol => false).should == "1,234,567.8900"
+    @money.to_s(:symbol => true).should == "$1,234,567.8900"
   end
 
 
-  def test_code
-    m = test_default
-    assert_equal "$1,234,567.89", m.to_s(:code => false)
-    assert_equal "USD $1,234,567.89", m.to_s(:code => true)
-
-    m
+  it "handles code options" do
+    @money.to_s(:code => false).should == "$1,234,567.8900"
+    @money.to_s(:code => true).should == "USD $1,234,567.8900"
   end
 
 
-  def test_misc
+  it "handles html and more" do
     m = ::Currency::Money(12.45, :USD)
-    assert_equal "<span class=\"currency_code\">USD</span> $12.45", 
-    m.to_s(:html => true, :code => true)
+    money_string = m.to_s(:html => true, :code => true)
+    money_string.should == "<span class=\"currency_code\">USD</span> $12.4500"
+    
 
     m = ::Currency::Money(12.45, :EUR)
-    assert_equal "<span class=\"currency_code\">EUR</span> &#8364;12.45", 
-    m.to_s(:html => true, :code => true)
+    money_string = m.to_s(:html => true, :code => true)
+    money_string.should == "<span class=\"currency_code\">EUR</span> &#8364;12.4500"
 
     m = ::Currency::Money(12345.45, :EUR)
-    assert_equal "<span class=\"currency_code\">EUR</span> &#8364;12_345.45", 
-    m.to_s(:html => true, :code => true, :thousands_separator => '_')
+    money_string = m.to_s(:html => true, :code => true, :thousands_separator => '_')
+    money_string.should == "<span class=\"currency_code\">EUR</span> &#8364;12_345.4500"
   end
 
 
-  def test_time
+  it "handles time options" do
     time = Time.new
-    m = test_default(time)
-    assert_equal "$1,234,567.89", m.to_s(:time => false)
-    assert_equal "$1,234,567.89 #{time.getutc.xmlschema(4)}", m.to_s(:time => true)
-
-    m
+    m = Currency::Money.new_rep(12345678900, :USD, time)
+    m.to_s(:time => false).should == "$1,234,567.8900"
+    m.to_s(:time => true).should == "$1,234,567.8900 #{time.getutc.xmlschema(4)}"
   end
 
+  it "handles decimal options" do
+    @money = Currency::Money.new_rep(12345678900, :USD, @time)
+    @money.to_s(:decimals => 2).should == "$1,234,567.89"
+    @money.to_s(:decimals => 3).should == "$1,234,567.890"
+    @money.to_s(:decimals => 4).should == "$1,234,567.8900"
+  end
 end
-
-end # module
-

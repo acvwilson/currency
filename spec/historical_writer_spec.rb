@@ -42,15 +42,15 @@ class HistoricalWriterTest < ArTestBase
   end
 
 
-  def setup
+  before do
     super
     
   end
 
   
-  def test_writer
-    assert_not_nil src = @src
-    assert_not_nil writer = Exchange::Rate::Source::Historical::Writer.new()
+  it "writer" do
+    src = @src.should.not == nil
+    writer = Exchange::Rate::Source::Historical::Writer.new().should.not == nil
     writer.time_quantitizer = :current
     writer.required_currencies = [ :USD, :GBP, :EUR, :CAD ]
     writer.base_currencies = [ :USD ]
@@ -67,9 +67,9 @@ class HistoricalWriterTest < ArTestBase
     writer = test_writer
     writer.source = @src
     rates = writer.write_rates
-    assert_not_nil rates
-    assert rates.size > 0
-    assert 12, rates.size
+    rates.should.not == nil
+    rates.size.should > 0
+    12, rates.size.should.not == nil
     assert_h_rates(rates, writer)
   end
 
@@ -79,16 +79,16 @@ class HistoricalWriterTest < ArTestBase
     writer.source = @src2
     return unless writer.source.available?
     rates = writer.write_rates
-    assert_not_nil rates
-    assert rates.size > 0
-    assert_equal 12, rates.size
+    rates.should.not == nil
+    rates.size.should > 0
+    rates.size.should == 12
     assert_h_rates(rates, writer)
   end
 
 
   def xxx_test_required_failure
-    assert_not_nil writer = Exchange::Rate::Source::Historical::Writer.new()
-    assert_not_nil src = @src
+    writer = Exchange::Rate::Source::Historical::Writer.new().should.not == nil
+    src = @src.should.not == nil
     writer.source = src
     writer.required_currencies = [ :USD, :GBP, :EUR, :CAD, :ZZZ ]
     writer.preferred_currencies = writer.required_currencies
@@ -96,7 +96,7 @@ class HistoricalWriterTest < ArTestBase
   end
 
 
-  def test_historical_rates
+  it "historical rates" do
     # Make sure there are historical Rates avail for today.
     writer_src
     writer_src2
@@ -106,38 +106,38 @@ class HistoricalWriterTest < ArTestBase
     deriver = Exchange::Rate::Deriver.new(:source => source)
     Exchange::Rate::Source.default = deriver
 
-    assert_not_nil rates = source.get_raw_rates
-    assert ! rates.empty?
+    rates = source.get_raw_rates.should.not == nil
+     rates.empty?.should.not == true
     # $stderr.puts "historical rates = #{rates.inspect}"
 
-    assert_not_nil rates = source.get_rates
-    assert ! rates.empty?
+    rates = source.get_rates.should.not == nil
+     rates.empty?.should.not == true
     # $stderr.puts "historical rates = #{rates.inspect}"
     
-    assert_not_nil m_usd = ::Currency.Money('1234.56', :USD, :now)
+    m_usd = ::Currency.Money('1234.56', :USD, :now).should.not == nil
     # $stderr.puts "m_usd = #{m_usd.to_s(:code => true)}"
-    assert_not_nil m_eur = m_usd.convert(:EUR)
+    m_eur = m_usd.convert(:EUR).should.not == nil
     # $stderr.puts "m_eur = #{m_eur.to_s(:code => true)}"
 
   end
 
 
   def assert_h_rates(rates, writer = nil)
-    assert_not_nil hr0 = rates[0]
+    hr0 = rates[0].should.not == nil
     rates.each do | hr |
       found_hr = nil
       begin
-        assert_not_nil found_hr = hr.find_matching_this(:first)
+        found_hr = hr.find_matching_this(:first).should.not == nil
       rescue Object => err
         raise "#{hr.inspect}: #{err}:\n#{err.backtrace.inspect}"
       end
 
-      assert_not_nil hr0
+      hr0.should.not == nil
 
-      assert_equal hr0.date, hr.date
-      assert_equal hr0.date_0, hr.date_0
-      assert_equal hr0.date_1, hr.date_1
-      assert_equal hr0.source, hr.source
+      hr.date.should == hr0.date
+      hr.date_0.should == hr0.date_0
+      hr.date_1.should == hr0.date_1
+      hr.source.should == hr0.source
 
       assert_equal_rate(hr, found_hr)
       assert_rate_defaults(hr, writer)
@@ -146,31 +146,31 @@ class HistoricalWriterTest < ArTestBase
 
 
   def assert_equal_rate(hr0, hr)
-    assert_equal hr0.c1.to_s, hr.c1.to_s
-    assert_equal hr0.c2.to_s, hr.c2.to_s
-    assert_equal hr0.source, hr.source
+    hr.c1.to_s.should == hr0.c1.to_s
+    hr.c2.to_s.should == hr0.c2.to_s
+    hr.source.should == hr0.source
     assert_equal_float hr0.rate, hr.rate
     assert_equal_float hr0.rate_avg, hr.rate_avg
-    assert_equal hr0.rate_samples, hr.rate_samples
+    hr.rate_samples.should == hr0.rate_samples
     assert_equal_float hr0.rate_lo, hr.rate_lo
     assert_equal_float hr0.rate_hi, hr.rate_hi
     assert_equal_float hr0.rate_date_0, hr.rate_date_0
     assert_equal_float hr0.rate_date_1, hr.rate_date_1
-    assert_equal hr0.date, hr.date
-    assert_equal hr0.date_0, hr.date_0
-    assert_equal hr0.date_1, hr.date_1
-    assert_equal hr0.derived, hr.derived
+    hr.date.should == hr0.date
+    hr.date_0.should == hr0.date_0
+    hr.date_1.should == hr0.date_1
+    hr.derived.should == hr0.derived
   end
 
 
   def assert_rate_defaults(hr, writer)
-    assert_equal writer.source.name, hr.source if writer
-    assert_equal hr.rate, hr.rate_avg
-    assert_equal hr.rate_samples, 1
-    assert_equal hr.rate, hr.rate_lo
-    assert_equal hr.rate, hr.rate_hi
-    assert_equal hr.rate, hr.rate_date_0
-    assert_equal hr.rate, hr.rate_date_1
+    hr.source if writer.should == writer.source.name
+    hr.rate_avg.should == hr.rate
+    1.should == hr.rate_samples
+    hr.rate_lo.should == hr.rate
+    hr.rate_hi.should == hr.rate
+    hr.rate_date_0.should == hr.rate
+    hr.rate_date_1.should == hr.rate
   end
 
 

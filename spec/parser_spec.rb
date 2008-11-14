@@ -7,7 +7,7 @@ require 'currency'
 module Currency
 
 class ParserTest < TestBase
-  def setup
+  before do
     super
     @parser = ::Currency::Currency.USD.parser_or_default
   end
@@ -16,86 +16,86 @@ class ParserTest < TestBase
   # Simple stuff.
   #
 
-  def test_default
+  it "default" do
     
   end
 
 
-  def test_thousands
-    assert_equal 123456789, @parser.parse("1234567.89").rep
+  it "thousands" do
+    @parser.parse("1234567.89").rep.should == 123456789
     assert_equal 123456789, @parser.parse("1,234,567.89").rep
   end
 
 
-  def test_cents
-    assert_equal  123456789, @parser.parse("1234567.89").rep
-    assert_equal  123456700, @parser.parse("1234567").rep
-    assert_equal  123456700, @parser.parse("1234567.").rep
-    assert_equal  123456780, @parser.parse("1234567.8").rep
-    assert_equal  123456789, @parser.parse("1234567.891").rep
-    assert_equal -123456700, @parser.parse("-1234567").rep
-    assert_equal  123456700, @parser.parse("+1234567").rep
+  it "cents" do
+    @parser.parse("1234567.89").rep.should == 123456789
+    @parser.parse("1234567").rep.should == 123456700
+    @parser.parse("1234567.").rep.should == 123456700
+    @parser.parse("1234567.8").rep.should == 123456780
+    @parser.parse("1234567.891").rep.should == 123456789
+    @parser.parse("-1234567").rep.should == -123456700
+    @parser.parse("+1234567").rep.should == 123456700
   end
 
 
-  def test_misc
-    assert_not_nil m = "123.45 USD".money + "100 CAD"
-    assert ! (m.rep == 200.45)
+  it "misc" do
+    m = "123.45 USD".money + "100 CAD".should.not == nil
+     (m.rep == 200.45).should.not == true
   end
 
 
-  def test_round_trip
+  it "round trip" do
     ::Currency::Currency.default = :USD
-    assert_not_nil m = ::Currency::Money("1234567.89", :CAD)
-    assert_not_nil m2 = ::Currency::Money(m.inspect)
-    assert_equal m.rep, m2.rep
-    assert_equal m.currency, m2.currency
-    assert_nil   m2.time
-    assert_equal m.inspect, m2.inspect
+    m = ::Currency::Money("1234567.89", :CAD).should.not == nil
+    m2 = ::Currency::Money(m.inspect).should.not == nil
+    m2.rep.should == m.rep
+    m2.currency.should == m.currency
+    m2.time.should == nil
+    m2.inspect.should == m.inspect
   end
 
 
-  def test_round_trip_time
+  it "round trip time" do
     ::Currency::Currency.default = :USD
     time = Time.now.getutc
-    assert_not_nil m = ::Currency::Money("1234567.89", :CAD, time)
-    assert_not_nil m.time
-    assert_not_nil m2 = ::Currency::Money(m.inspect)
-    assert_not_nil m2.time
-    assert_equal m.rep, m2.rep
-    assert_equal m.currency, m2.currency
-    assert_equal m.time.to_i, m2.time.to_i
-    assert_equal m.inspect, m2.inspect
+    m = ::Currency::Money("1234567.89", :CAD, time).should.not == nil
+    m.time.should.not == nil
+    m2 = ::Currency::Money(m.inspect).should.not == nil
+    m2.time.should.not == nil
+    m2.rep.should == m.rep
+    m2.currency.should == m.currency
+    m2.time.to_i.should == m.time.to_i
+    m2.inspect.should == m.inspect
   end
 
 
-  def test_time_nil
+  it "time nil" do
     parser = ::Currency::Parser.new
     parser.time = nil
 
-    assert_not_nil m = parser.parse("$1234.55")
-    assert_equal nil, m.time
+    m = parser.parse("$1234.55").should.not == nil
+    m.time.should == nil
   end
 
 
-  def test_time
+  it "time" do
     parser = ::Currency::Parser.new
     parser.time = Time.new
 
-    assert_not_nil m = parser.parse("$1234.55")
-   assert_equal parser.time, m.time
+    m = parser.parse("$1234.55").should.not == nil
+   m.time.should == parser.time
   end
 
 
-  def test_time_now
+  it "time now" do
     parser = ::Currency::Parser.new
     parser.time = :now
 
-    assert_not_nil m = parser.parse("$1234.55")
-    assert_not_nil m1_time = m.time
+    m = parser.parse("$1234.55").should.not == nil
+    m1_time = m.time.should.not == nil
 
-    assert_not_nil m = parser.parse("$1234.55")
-    assert_not_nil m2_time = m.time
+    m = parser.parse("$1234.55").should.not == nil
+    m2_time = m.time.should.not == nil
 
     assert_not_equal m1_time, m2_time
   end

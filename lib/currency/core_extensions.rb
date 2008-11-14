@@ -26,7 +26,14 @@ class Float
   def Money_rep(currency, time = nil)  
     Integer(Currency::Config.current.float_ref_filter.call(self * currency.scale))
   end
+  
+  def round_with_precision(precision = nil)
+    precision.nil? ? round_without_precision : (self * (10 ** precision)).round_without_precision / (10 ** precision).to_f
+  end
+  alias_method :round_without_precision, :round
+  alias_method :round, :round_with_precision
 end
+
 
 
 

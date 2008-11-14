@@ -1,301 +1,347 @@
-# Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
-# See LICENSE.txt for details.
+require File.dirname(__FILE__) + '/spec_helper'
 
 
-require 'test/test_base'
-require 'currency'
+describe Currency::Money do
 
-module Currency
-
-class MoneyTest < TestBase
-  def setup
-    super
+  it "create" do
+    m = Currency::Money.new(1.99)
+    m.should be_kind_of(Currency::Money) 
+    Currency::Currency.default.should == m.currency
+    :USD.should == m.currency.code
   end
 
-  ############################################
-  # Simple stuff.
-  #
+  describe "object money method" do
+    it "works with a float" do
+      m = 1.99.money(:USD)
+      m.should be_kind_of(Currency::Money)
+      :USD.should == m.currency.code
+      19900.should == m.rep
+    end
 
-  def test_create
-    assert_kind_of Money, m = Money.new(1.99)
-    assert_equal m.currency, Currency.default
-    assert_equal m.currency.code, :USD
+    it "works with a FixNum" do
+      m = 199.money(:CAD)
+      m.should be_kind_of(Currency::Money)
+      :CAD.should == m.currency.code
+      1990000.should == m.rep
+    end
 
-    m
+    it "works with a string" do
+      m = "13.98".money(:CAD)
+      m.should be_kind_of(Currency::Money)
+      :CAD.should == m.currency.code
+      139800.should == m.rep
+    end
+
+    it "works with a string again" do
+      m = "45.99".money(:EUR)
+      m.should be_kind_of(Currency::Money)
+      :EUR.should == m.currency.code
+      459900.should == m.rep
+    end
   end
 
-  def test_object_money_method
-    assert_kind_of Money, m = 1.99.money(:USD)
-    assert_equal m.currency.code, :USD
-    assert_equal m.rep, 199
-
-    assert_kind_of Money, m = 199.money(:CAD)
-    assert_equal m.currency.code, :CAD
-    assert_equal m.rep, 19900
-
-    assert_kind_of Money, m = "13.98".money(:CAD)
-    assert_equal m.currency.code, :CAD
-    assert_equal m.rep, 1398
-
-    assert_kind_of Money, m = "45.99".money(:EUR)
-    assert_equal m.currency.code, :EUR
-    assert_equal m.rep, 4599
+  def zero_money
+    @zero_money ||= Currency::Money.new(0)
+  end
+  
+  it "zero" do
+    zero_money.negative?.should_not == true
+    zero_money.zero?.should_not == nil
+    zero_money.positive?.should_not == true
+  end
+  
+  def negative_money
+    @negative_money ||= Currency::Money.new(-1.00, :USD)
+  end
+  
+  it "negative" do
+    negative_money.negative?.should_not == nil
+    negative_money.zero?.should_not == true
+    negative_money.positive?.should_not == true
   end
 
-  def test_zero
-    m = Money.new(0)
-    assert ! m.negative?
-    assert   m.zero?
-    assert ! m.positive?
-    m
+  def positive_money
+    @positive_money ||= Currency::Money.new(2.99, :USD)
+  end
+  it "positive" do
+    positive_money.negative?.should_not == true
+    positive_money.zero?.should_not == true
+    positive_money.positive?.should_not == nil
   end
 
-  def test_negative
-    m = Money.new(-1.00, :USD)
-    assert   m.negative?
-    assert ! m.zero?
-    assert ! m.positive?
-    m
+  it "relational" do
+    n = negative_money
+    z = zero_money
+    p = positive_money
+
+    (n.should < p)
+     (n > p).should_not == true
+     (p < n).should_not == true
+    (p.should > n)
+    (p != n).should_not == nil
+
+    (z.should <= z)
+    (z.should >= z)
+
+    (z.should <= p)
+    (n.should <= z)
+    (z.should >= n)
+
+    n.should == n
+    p.should == p
+
+    z.should == zero_money
   end
 
-  def test_positive
-    m = Money.new(2.99, :USD)
-    assert ! m.negative?
-    assert ! m.zero?
-    assert   m.positive?
-    m
+  it "compare" do
+    n = negative_money
+    z = zero_money
+    p = positive_money
+
+    (n <=> p).should == -1
+    (p <=> n).should == 1
+    (p <=> z).should == 1
+
+    (n <=> n).should == 0
+    (z <=> z).should == 0
+    (p <=> p).should == 0    
   end
 
-  def test_relational
-    n = test_negative
-    z = test_zero
-    p = test_positive
-
-    assert   (n < p)
-    assert ! (n > p)
-    assert ! (p < n)
-    assert   (p > n)
-    assert   (p != n)
-
-    assert   (z <= z)
-    assert   (z >= z)
-
-    assert   (z <= p)
-    assert   (n <= z)
-    assert   (z >= n)
-
-    assert   n == n
-    assert   p == p
-
-    assert   z == test_zero
-  end
-
-  def test_compare
-    n = test_negative
-    z = test_zero
-    p = test_positive
-
-    assert (n <=> p) == -1
-    assert (p <=> n) == 1
-    assert (p <=> z) == 1
-
-    assert (n <=> n) == 0
-    assert (z <=> z) == 0
-    assert (p <=> p) == 0    
-  end
-
-  def test_rep
-    assert_not_nil m = Money.new(123, :USD)
-    assert  m.rep == 12300
+  it "rep" do
+    m = Currency::Money.new(123, :USD)
+    m.should_not == nil
+    m.rep.should == 1230000
     
-    assert_not_nil m = Money.new(123.45, :USD)
-    assert  m.rep == 12345
+    m = Currency::Money.new(123.45, :USD)
+    m.should_not == nil
+    m.rep.should == 1234500
 
-    assert_not_nil m = Money.new("123.456", :USD)
-    assert  m.rep == 12345
+    m = Currency::Money.new("123.456", :USD)
+    m.should_not == nil
+    m.rep.should == 1234560
   end
 
-  def test_convert
-    assert_not_nil m = Money.new("123.456", :USD)
-    assert  m.rep == 12345
+  it "convert" do
+    m = Currency::Money.new("123.456", :USD)
+    m.should_not == nil
+    m.rep.should == 1234560
 
-    assert_equal 123, m.to_i
-    assert_equal 123.45, m.to_f
-    assert_equal "$123.45", m.to_s
+    m.to_i.should == 123
+    m.to_f.should == 123.456
+    m.to_s.should == "$123.4560"
   end
 
-  def test_eql
-    assert_not_nil usd1 = Money.new(123, :USD)
-    assert_not_nil usd2 = Money.new("123", :USD)
+  it "eql" do
+    usd1 = Currency::Money.new(123, :USD)
+    usd1.should_not == nil
+    usd2 = Currency::Money.new("123", :USD)
+    usd2.should_not == nil
 
-    assert_equal :USD, usd1.currency.code
-    assert_equal :USD, usd2.currency.code
+    usd1.currency.code.should == :USD
+    usd2.currency.code.should == :USD
     
-    assert_equal usd1.rep, usd2.rep
+    usd2.rep.should == usd1.rep
 
-    assert usd1 == usd2
+    usd1.should == usd2
 
   end
 
-  def test_not_eql  
+  it "not eql" do  
  
-    assert_not_nil usd1 = Money.new(123, :USD)
-    assert_not_nil usd2 = Money.new("123.01", :USD)
+    usd1 = Currency::Money.new(123, :USD)
+    usd1.should_not == nil
+    usd2 = Currency::Money.new("123.01", :USD)
+    usd2.should_not == nil
 
-    assert_equal :USD, usd1.currency.code
-    assert_equal :USD, usd2.currency.code
+    usd1.currency.code.should == :USD
+    usd2.currency.code.should == :USD
     
-    assert_not_equal usd1.rep, usd2.rep
+    usd2.rep.should_not == usd1.rep
 
-    assert usd1 != usd2
+    (usd1 != usd2).should_not == nil
 
     ################
     # currency !=
     # rep ==
 
-    assert_not_nil usd = Money.new(123, :USD)
-    assert_not_nil cad = Money.new(123, :CAD)
+    usd = Currency::Money.new(123, :USD)
+    usd.should_not == nil
+    cad = Currency::Money.new(123, :CAD)
+    cad.should_not == nil
 
-    assert_equal :USD, usd.currency.code
-    assert_equal :CAD, cad.currency.code
+    usd.currency.code.should == :USD
+    cad.currency.code.should == :CAD
 
-    assert_equal usd.rep, cad.rep
-    assert usd.currency != cad.currency
+    cad.rep.should == usd.rep
+    (usd.currency != cad.currency).should_not == nil
 
-    assert usd != cad
+    (usd != cad).should_not == nil
 
   end
-
-  def test_op
-    # Using default get_rate
-    assert_not_nil usd = Money.new(123.45, :USD)
-    assert_not_nil cad = Money.new(123.45, :CAD)
-
-    # - Money => Money
-    assert_equal(-12345, (- usd).rep)
-    assert_equal :USD, (- usd).currency.code
-
-    assert_equal(-12345, (- cad).rep)
-    assert_equal :CAD, (- cad).currency.code
-
-    # Money + Money => Money
-    assert_kind_of Money, m = (usd + usd)
-    assert_equal 24690, m.rep
-    assert_equal :USD, m.currency.code
-
-    assert_kind_of Money, m = (usd + cad)
-    assert_equal 22889, m.rep
-    assert_equal :USD, m.currency.code
-
-    assert_kind_of Money, m = (cad + usd)
-    assert_equal 26798, m.rep
-    assert_equal :CAD, m.currency.code
-
-    # Money - Money => Money
-    assert_kind_of Money, m = (usd - usd)
-    assert_equal 0, m.rep
-    assert_equal :USD, m.currency.code
-
-    assert_kind_of Money, m = (usd - cad)
-    assert_equal 1801, m.rep
-    assert_equal :USD, m.currency.code
-
-    assert_kind_of Money, m = (cad - usd)
-    assert_equal -2108, m.rep
-    assert_equal :CAD, m.currency.code
-
-    # Money * Numeric => Money
-    assert_kind_of Money, m = (usd * 0.5)
-    assert_equal 6172, m.rep
-    assert_equal :USD, m.currency.code
-
-    # Money / Numeric => Money
-    assert_kind_of Money, m = usd / 3
-    assert_equal 4115, m.rep
-    assert_equal :USD, m.currency.code
-
-    # Money / Money => Numeric
-    assert_kind_of Numeric, m = usd / Money.new("41.15", :USD)
-    assert_equal_float 3.0, m
+  
+  describe "operations" do
+    before(:each) do
+      @usd = Currency::Money.new(123.45, :USD)
+      @cad = Currency::Money.new(123.45, :CAD)
+    end
     
-    assert_kind_of Numeric, m = (usd / cad)
-    assert_equal_float Exchange::Rate::Source::Test.USD_CAD, m, 0.0001
+    it "should work" do
+      @usd.should_not == nil
+      @cad.should_not == nil
+    end
+    
+    it "handle negative money" do
+      # - Currency::Money => Currency::Money
+      (- @usd).rep.should == -1234500
+      (- @usd).currency.code.should == :USD
+
+      (- @cad).rep.should == -1234500
+      (- @cad).currency.code.should == :CAD
+    end
+    
+    it "should add monies of the same currency" do
+      m = (@usd + @usd)
+      m.should be_kind_of(Currency::Money)
+      m.rep.should == 2469000
+      m.currency.code.should == :USD
+    end
+    
+    it "should add monies of different currencies and return USD" do
+      m = (@usd + @cad)
+      m.should be_kind_of(Currency::Money)
+      m.rep.should == 2288907
+      m.currency.code.should == :USD
+    end
+    
+    it "should add monies of different currencies and return CAD" do
+      m = (@cad + @usd)
+      m.should be_kind_of(Currency::Money) 
+      m.rep.should == 2679852
+      m.currency.code.should == :CAD
+    end
+    
+    it "should subtract monies of the same currency" do
+      m = (@usd - @usd)
+      m.should be_kind_of(Currency::Money) 
+      m.rep.should == 0
+      m.currency.code.should == :USD
+    end
+    
+    it "should subtract monies of different currencies and return USD" do
+      m = (@usd - @cad)
+      m.should be_kind_of(Currency::Money) 
+      m.rep.should == 180093
+      m.currency.code.should == :USD
+    end
+    
+    it "should subtract monies of different currencies and return CAD" do
+      m = (@cad - @usd)
+      m.should be_kind_of(Currency::Money) 
+      m.rep.should == -210852
+      m.currency.code.should == :CAD
+    end
+    
+    it "should multiply by numerics and return money" do
+      m = (@usd * 0.5)
+      m.should be_kind_of(Currency::Money)
+      m.rep.should == 617250
+      m.currency.code.should == :USD
+    end
+    
+    it "should divide by numerics and return money" do
+      m = @usd / 3
+      m.should be_kind_of(Currency::Money)
+      m.rep.should == 411500
+      m.currency.code.should == :USD
+    end
+    
+    it "should divide by monies of the same currency and return numeric" do
+      m = @usd / Currency::Money.new("41.15", :USD)
+      m.should be_kind_of(Numeric)
+      m.should be_close(3.0, 1.0e-8)
+    end
+    
+    it "should divide by monies of different currencies and return numeric" do
+      m = (@usd / @cad)
+      m.should be_kind_of(Numeric)
+      m.should be_close(Currency::Exchange::Rate::Source::Test.USD_CAD, 0.0001)
+    end
   end
 
-
-  def test_pivot_conversions
+  it "pivot conversions" do
     # Using default get_rate
-    assert_not_nil cad = Money.new(123.45, :CAD)
-    assert_not_nil eur = cad.convert(:EUR)
-    assert_kind_of Numeric, m = (eur.to_f / cad.to_f)
-    m_expected = (1.0 / Exchange::Rate::Source::Test.USD_CAD) * Exchange::Rate::Source::Test.USD_EUR
-    # $stderr.puts "m = #{m}, expected = #{m_expected}"
-    assert_equal_float m_expected, m, 0.001
+    cad = Currency::Money.new(123.45, :CAD)
+    cad.should_not == nil
+    eur = cad.convert(:EUR)
+    eur.should_not == nil
+    m = (eur.to_f / cad.to_f)
+    m.should be_kind_of(Numeric) 
+    m_expected = (1.0 / Currency::Exchange::Rate::Source::Test.USD_CAD) * Currency::Exchange::Rate::Source::Test.USD_EUR
+    m.should be_close(m_expected, 0.001)
 
 
-    assert_not_nil gbp = Money.new(123.45, :GBP)
-    assert_not_nil eur = gbp.convert(:EUR)
-    assert_kind_of Numeric, m = (eur.to_f / gbp.to_f)
-    m_expected = (1.0 / Exchange::Rate::Source::Test.USD_GBP) * Exchange::Rate::Source::Test.USD_EUR
-    # $stderr.puts "m = #{m}, expected = #{m_expected}"
-    assert_equal_float m_expected, m, 0.001
+    gbp = Currency::Money.new(123.45, :GBP)
+    gbp.should_not == nil
+    eur = gbp.convert(:EUR)
+    eur.should_not == nil
+    m = (eur.to_f / gbp.to_f)
+    m.should be_kind_of(Numeric) 
+    m_expected = (1.0 / Currency::Exchange::Rate::Source::Test.USD_GBP) * Currency::Exchange::Rate::Source::Test.USD_EUR
+    m.should be_close(m_expected, 0.001)
   end
 
 
-  def test_invalid_currency_code
-    assert_raise Exception::InvalidCurrencyCode do
-      Money.new(123, :asdf)
-    end
-    assert_raise Exception::InvalidCurrencyCode do
-      Money.new(123, 5)
-    end
+  it "invalid currency code" do
+    lambda {Currency::Money.new(123, :asdf)}.should raise_error(Currency::Exception::InvalidCurrencyCode)
+    lambda {Currency::Money.new(123, 5)}.should raise_error(Currency::Exception::InvalidCurrencyCode)
   end
 
 
-  def test_time_default
-    Money.default_time = nil
+  it "time default" do
+    Currency::Money.default_time = nil
 
-    assert_not_nil usd = Money.new(123.45, :USD)
-    assert_nil usd.time
+    usd = Currency::Money.new(123.45, :USD)
+    usd.should_not == nil
+    usd.time.should == nil
 
-    Money.default_time = Time.now
-    assert_not_nil usd = Money.new(123.45, :USD)
-    assert_equal usd.time, Money.default_time
+    Currency::Money.default_time = Time.now
+    usd = Currency::Money.new(123.45, :USD)
+    usd.should_not == nil
+    Currency::Money.default_time.should == usd.time
   end
 
 
-  def test_time_now
-    # Test
-    Money.default_time = :now
+  it "time now" do
+    Currency::Money.default_time = :now
 
-    assert_not_nil usd = Money.new(123.45, :USD)
-    assert_not_nil usd.time
+    usd = Currency::Money.new(123.45, :USD)
+    usd.should_not == nil
+    usd.time.should_not == nil
 
     sleep 1
 
-    assert_not_nil usd2 = Money.new(123.45, :USD)
-    assert_not_nil usd2.time
-    assert usd.time != usd2.time
+    usd2 = Currency::Money.new(123.45, :USD)
+    usd2.should_not == nil
+    usd2.time.should_not == nil
+    (usd.time != usd2.time).should_not == nil
 
-    Money.default_time = nil
+    Currency::Money.default_time = nil
   end
 
 
-  def test_time_fixed
-    # Test for fixed time.
-    Money.default_time = Time.new
+  it "time fixed" do
+    Currency::Money.default_time = Time.new
 
-    assert_not_nil usd = Money.new(123.45, :USD)
-    assert_not_nil usd.time
+    usd = Currency::Money.new(123.45, :USD)
+    usd.should_not == nil
+    usd.time.should_not == nil
 
     sleep 1
 
-    assert_not_nil usd2 = Money.new(123.45, :USD)
-    assert_not_nil usd2.time
-    assert usd.time == usd2.time
+    usd2 = Currency::Money.new(123.45, :USD)
+    usd2.should_not == nil
+    usd2.time.should_not == nil
+    usd.time.should == usd2.time
   end
-
-end # class
-
-end # module
+end
 

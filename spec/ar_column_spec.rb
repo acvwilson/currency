@@ -40,7 +40,7 @@ class ArFieldTest < ArTestCore
 
   ##################################################
 
-  def setup
+  before do
     @currency_test_migration ||= CurrencyColumnTestMigration 
     @currency_test ||= CurrencyColumnTest
     super
@@ -53,13 +53,13 @@ class ArFieldTest < ArTestCore
   ##################################################
 
 
-  def test_field
+  it "field" do
     insert_records
 
-    assert_not_nil usd = @currency_test.find(@usd.id)
+    usd = @currency_test.find(@usd.id).should.not == nil
     assert_equal_currency usd, @usd
 
-    assert_not_nil cad = @currency_test.find(@cad.id)
+    cad = @currency_test.find(@cad.id).should.not == nil
     assert_equal_currency cad, @cad
   end
 

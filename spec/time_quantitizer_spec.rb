@@ -10,7 +10,7 @@ module Currency
 module Exchange
 
 class TimeQuantitizerTest < TestBase
-  def setup
+  before do
     super
   end
 
@@ -18,29 +18,29 @@ class TimeQuantitizerTest < TestBase
   # 
   #
 
-  def test_create
+  it "create" do
     assert_kind_of TimeQuantitizer, tq = TimeQuantitizer.new()
-    assert_equal 60 * 60 * 24, tq.time_quant_size
-    assert_nil tq.quantitize_time(nil)
+    tq.time_quant_size.should == 60 * 60 * 24
+    tq.quantitize_time(nil).should == nil
 
     tq
   end
 
 
-  def test_localtime
+  it "localtime" do
     t1 = assert_test_day(t0 = Time.new)
-    assert_equal t0.utc_offset, t1.utc_offset
-    assert_equal Time.now.utc_offset, t1.utc_offset
+    t1.utc_offset.should == t0.utc_offset
+    t1.utc_offset.should == Time.now.utc_offset
   end
 
 
-  def test_utc
+  it "utc" do
     t1 = assert_test_day(t0 = Time.new.utc)
-    assert_equal t0.utc_offset, t1.utc_offset
+    t1.utc_offset.should == t0.utc_offset
   end
 
 
-  def test_random
+  it "random" do
     (1 .. 1000).each do
       t0 = Time.at(rand(1234567901).to_i)
       assert_test_day(t0)
@@ -63,13 +63,13 @@ class TimeQuantitizerTest < TestBase
     tq = test_create
 
     begin
-      assert_not_nil t1 = tq.quantitize_time(t0)
+      t1 = tq.quantitize_time(t0).should.not == nil
       #$stderr.puts "t0 = #{t0}"
       #$stderr.puts "t1 = #{t1}"
       
-      assert_equal t0.year, t1.year
-      assert_equal t0.month, t1.month
-      assert_equal t0.day, t1.day
+      t1.year.should == t0.year
+      t1.month.should == t0.month
+      t1.day.should == t0.day
       assert_time_beginning_of_day(t1)
     rescue Object => err
       raise("#{err}\nDuring quantitize_time(#{t0} (#{t0.to_i}))")
@@ -82,13 +82,13 @@ class TimeQuantitizerTest < TestBase
   def assert_test_hour(t0)
     tq = TimeQuantitizer.new(:time_quant_size => 60 * 60) # 1 hour
 
-    assert_not_nil t1 = tq.quantitize_time(t0)
+    t1 = tq.quantitize_time(t0).should.not == nil
     #$stderr.puts "t0 = #{t0}"
     #$stderr.puts "t1 = #{t1}"
 
-    assert_equal t0.year, t1.year
-    assert_equal t0.month, t1.month
-    assert_equal t0.day, t1.day
+    t1.year.should == t0.year
+    t1.month.should == t0.month
+    t1.day.should == t0.day
     assert_time_beginning_of_hour(t1)
 
     t1
@@ -100,13 +100,13 @@ class TimeQuantitizerTest < TestBase
 
     tq.local_timezone_offset
 
-    assert_not_nil t1 = tq.quantitize_time(t0)
+    t1 = tq.quantitize_time(t0).should.not == nil
     $stderr.puts "t0 = #{t0}"
     $stderr.puts "t1 = #{t1}"
 
-    assert_equal t0.year, t1.year
-    assert_equal t0.month, t1.month
-    assert_equal t0.day, t1.day
+    t1.year.should == t0.year
+    t1.month.should == t0.month
+    t1.day.should == t0.day
     assert_time_beginning_of_day(t1)
 
     t1
@@ -114,19 +114,19 @@ class TimeQuantitizerTest < TestBase
 
 
   def assert_time_beginning_of_day(t1)
-    assert_equal 0, t1.hour
+    t1.hour.should == 0
     assert_time_beginning_of_hour(t1)
   end
 
 
   def assert_time_beginning_of_hour(t1)
-    assert_equal 0, t1.min
+    t1.min.should == 0
     assert_time_beginning_of_min(t1)
   end
 
 
   def assert_time_beginning_of_min(t1)
-    assert_equal 0, t1.sec
+    t1.sec.should == 0
   end
 
 end # class
