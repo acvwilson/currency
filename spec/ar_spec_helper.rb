@@ -24,6 +24,7 @@ def ar_setup
   
 end
 
+# DB Connection info
 def database_spec
   # TODO: Get from ../config/database.yml:test
   # Create test database on:
@@ -59,6 +60,7 @@ def database_spec
   
 end
 
+# Run AR migrations UP
 def schema_up
   return unless @currency_test_migration
   begin
@@ -68,6 +70,8 @@ def schema_up
   end
 end
 
+
+# Run AR migrations DOWN
 def schema_down
   return unless @currency_test_migration
   begin
@@ -77,10 +81,7 @@ def schema_down
   end
 end
 
-##################################################
-# Scaffold
-# 
-
+# Scaffold: insert stuff into DB so we can test AR integration
 def insert_records
   delete_records
 
@@ -99,6 +100,7 @@ end
 
 ##################################################
 
+# TODO: need this?
 def assert_equal_money(a,b)
   a.should_not be_nil
   b.should_not be_nil
@@ -114,7 +116,7 @@ def assert_equal_money(a,b)
   b.amount.rep.should == a.amount.convert(b.amount.currency).rep
 end
 
-
+# TODO: need this?
 def assert_equal_currency(a,b)
   assert_equal_money a, b
 
