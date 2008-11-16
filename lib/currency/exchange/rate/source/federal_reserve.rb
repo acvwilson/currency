@@ -1,11 +1,10 @@
 # Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
 # See LICENSE.txt for details.
 
-require 'currency/exchange/rate/source/provider'
+require File.dirname(__FILE__) + '/provider'
 
 require 'net/http'
 require 'open-uri'
-
 
 # Connects to http://www.federalreserve.gov/releases/H10/hist/dat00_<country>.txtb
 # Parses all known currency files.
@@ -26,12 +25,10 @@ class Currency::Exchange::Rate::Source::FederalReserve < ::Currency::Exchange::R
     super(*opt)
   end
   
-
   # Returns 'federalreserve.gov'.
   def name
     'federalreserve.gov'
   end
-
 
   # FIXME?
   #def available?(time = nil)
@@ -44,7 +41,6 @@ class Currency::Exchange::Rate::Source::FederalReserve < ::Currency::Exchange::R
     @raw_rates = nil
     super
   end
-  
 
   def raw_rates
     rates
@@ -56,8 +52,7 @@ class Currency::Exchange::Rate::Source::FederalReserve < ::Currency::Exchange::R
   # See http://www.jhall.demon.co.uk/currency/by_country.html
   #
   # Some data files list reciprocal rates!
-  @@country_to_currency = 
-    {
+  @@country_to_currency = {
     'al' => [ :AUD, :USD ],
     # 'au' => :ASH, # AUSTRIAN SHILLING: pre-EUR?
     'bz' => [ :USD, :BRL ],
@@ -83,7 +78,6 @@ class Currency::Exchange::Rate::Source::FederalReserve < ::Currency::Exchange::R
     'uk' => [ :GBP, :USD ],
     've' => [ :USD, :VEB ],
   }
-
 
   # Parses text file for rates.
   def parse_rates(data = nil)
@@ -122,7 +116,7 @@ class Currency::Exchange::Rate::Source::FederalReserve < ::Currency::Exchange::R
 
       rate = m[4].to_f
 
-      STDERR.puts "#{c1} #{c2} #{rate}\t#{date}" if @verbose
+      # STDERR.puts "#{c1} #{c2} #{rate}\t#{date}" if @verbose
 
       rates << new_rate(c1, c2, rate, date)
 
@@ -140,7 +134,6 @@ class Currency::Exchange::Rate::Source::FederalReserve < ::Currency::Exchange::R
     rates
   end
   
-  
   # Return a list of known base rates.
   def load_rates(time = nil)
     # $stderr.puts "#{self}: load_rates(#{time})" if @verbose
@@ -152,8 +145,6 @@ class Currency::Exchange::Rate::Source::FederalReserve < ::Currency::Exchange::R
     end
     rates
   end
-  
- 
 end # class
 
 

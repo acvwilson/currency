@@ -1,6 +1,5 @@
 require File.dirname(__FILE__) + '/ar_spec_helper'
 
-
 ##################################################
 # Basic CurrenyTest AR::B class
 #

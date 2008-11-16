@@ -41,7 +41,7 @@ class Currency::Exchange::Rate::Source::Base
     end 
 
 
-    def __subclass_responsibility(meth)
+    def __subclass_responsibility(method)
       raise ::Currency::Exception::SubclassResponsibility, 
       [
        "#{self.class}#\#{meth}", 
@@ -61,7 +61,7 @@ class Currency::Exchange::Rate::Source::Base
         m
       else
         rate = rate(c1, c2, time)
-        # raise ::Currency::Exception::UnknownRate, "#{c1} #{c2} #{time}" unless rate
+        raise ::Currency::Exception::UnknownRate, "Cannot convert #{m} from #{c1} to #{c2} at time #{time}" unless rate
           
         rate && ::Currency::Money(rate.convert(m, c1), c2, time)
       end

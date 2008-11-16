@@ -1,8 +1,7 @@
 # Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
 # See LICENSE.txt for details.
 
-require 'currency/exchange/rate/source'
-
+require File.dirname(__FILE__) + '/../source'
 
 # Base class for rate data providers.
 # Assumes that rate sources provide more than one rate per query.
@@ -31,6 +30,7 @@ class Currency::Exchange::Rate::Source::Provider < Currency::Exchange::Rate::Sou
 
   # Returns the date to query for rates.
   # Defaults to yesterday.
+  # TODO: use ActiveSupport here?
   def date
     @date || (Time.now - 24 * 60 * 60) # yesterday.
   end
@@ -56,19 +56,14 @@ class Currency::Exchange::Rate::Source::Provider < Currency::Exchange::Rate::Sou
 
   # Returns the URI string as evaluated with this object.
   def get_uri
-    uri = self.uri
-    uri = "\"#{uri}\""
-    uri = instance_eval(uri)
+    uri = instance_eval("\"#{self.uri}\"")
     $stderr.puts "#{self}: uri = #{uri.inspect}" if @verbose
     uri
   end
 
-
   # Returns the URI content.
   def get_page_content
-    data = open(get_uri) { |data| data.read }
-    
-    data
+    open(get_uri) { |data| data.read }
   end
 
 
@@ -96,10 +91,12 @@ class Currency::Exchange::Rate::Source::Provider < Currency::Exchange::Rate::Sou
 
   # Return a matching base rate.
   def get_rate(c1, c2, time)
+    # puts "Getting rates for c1: #{c1} and c2: #{c2} at #{time}\n rates: #{rates.map{|r| "#{r.c1}->#{r.c2}"}.inspect}"
     rates.each do | rate |
+      # puts " >#{rate.c1} == #{c1} && #{rate.c2} == #{c2} #{rate.c1 == c1} && #{rate.c2.to_s == c2.to_s}< "
       return rate if 
         rate.c1 == c1 &&
-        rate.c2 == c2 &&
+        rate.c2.to_s == c2.to_s && # FIXME: understand why this second param needs to be cast to String for specs to pass
         (! time || normalize_time(rate.date) == time)
     end
 
