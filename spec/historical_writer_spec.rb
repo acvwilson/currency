@@ -1,56 +1,42 @@
 # Copyright (C) 2006-2007 Kurt Stephens <ruby-currency(at)umleta.com>
 # See LICENSE.txt for details.
+require File.dirname(__FILE__) + '/ar_spec_helper'
 
-require 'test/ar_test_base'
+require File.dirname(__FILE__) + '/../lib/currency/exchange/rate/source/historical'
+require File.dirname(__FILE__) + '/../lib/currency/exchange/rate/source/historical/writer'
+require File.dirname(__FILE__) + '/../lib/currency/exchange/rate/source/xe'
+require File.dirname(__FILE__) + '/../lib/currency/exchange/rate/source/new_york_fed'
 
-require 'rubygems'
-require 'active_record'
-require 'active_record/migration'
+include Currency
+RATE_CLASS = Exchange::Rate::Source::Historical::Rate
+TABLE_NAME = RATE_CLASS.table_name
 
-require 'currency' # For :type => :money
-
-require 'currency/exchange/rate/source/historical'
-require 'currency/exchange/rate/source/historical/writer'
-require 'currency/exchange/rate/source/xe'
-require 'currency/exchange/rate/source/new_york_fed'
-
-
-module Currency
-
-class HistoricalWriterTest < ArTestBase
-
-  RATE_CLASS = Exchange::Rate::Source::Historical::Rate
-  TABLE_NAME = RATE_CLASS.table_name
-
-  class HistoricalRateMigration < AR_M
-    def self.up
-      RATE_CLASS.__create_table(self)
-    end
-
-    def self.down
-      drop_table TABLE_NAME.intern
-    end
+class HistoricalRateMigration < ActiveRecord::Migration
+  def self.up
+    RATE_CLASS.__create_table(self)
   end
 
-
-  def initialize(*args)
-    @currency_test_migration = HistoricalRateMigration
-    super
-
-    @src = Exchange::Rate::Source::Xe.new
-    @src2 = Exchange::Rate::Source::NewYorkFed.new
+  def self.down
+    drop_table TABLE_NAME.to_sym
   end
+end
 
-
-  before do
-    super
-    
+describe "HistoricalWriter" do
+  before(:all) do
+    ActiveRecord::Base.establish_connection(database_spec)
+    @currency_test_migration ||= HistoricalRateMigration
+    schema_down
+    schema_up
+    @xe_src  = Exchange::Rate::Source::Xe.new
+    @fed_src = Exchange::Rate::Source::NewYorkFed.new
   end
-
   
-  it "writer" do
-    src = @src.should_not == nil
-    writer = Exchange::Rate::Source::Historical::Writer.new().should_not == nil
+  after(:all) do
+    schema_down
+  end
+  
+  def setup_writer(source)
+    writer = Exchange::Rate::Source::Historical::Writer.new
     writer.time_quantitizer = :current
     writer.required_currencies = [ :USD, :GBP, :EUR, :CAD ]
     writer.base_currencies = [ :USD ]
@@ -58,130 +44,78 @@ class HistoricalWriterTest < ArTestBase
     writer.reciprocal_rates = true
     writer.all_rates = true
     writer.identity_rates = false
-    
+    writer.source = source
     writer
   end
   
-
-  def writer_src
-    writer = test_writer
-    writer.source = @src
+  it "does stuff with a Xe writer" do
+    writer = setup_writer(@xe_src)
     rates = writer.write_rates
-    rates.should_not == nil
-    rates.size.should > 0
-    12, rates.size.should_not == nil
-    assert_h_rates(rates, writer)
-  end
-
-
-  def writer_src2
-    writer = test_writer
-    writer.source = @src2
-    return unless writer.source.available?
-    rates = writer.write_rates
-    rates.should_not == nil
-    rates.size.should > 0
     rates.size.should == 12
     assert_h_rates(rates, writer)
   end
-
-
-  def xxx_test_required_failure
-    writer = Exchange::Rate::Source::Historical::Writer.new().should_not == nil
-    src = @src.should_not == nil
-    writer.source = src
-    writer.required_currencies = [ :USD, :GBP, :EUR, :CAD, :ZZZ ]
-    writer.preferred_currencies = writer.required_currencies
-    assert_raises(::RuntimeError) { writer.selected_rates }
+  
+  it "does stuff with NewYorkFed (will fail on weekends)" do
+    if @fed_src.available?
+      writer = setup_writer(@fed_src)
+      rates = writer.write_rates
+      rates.size.should == 12
+      assert_h_rates(rates, writer)
+    end
   end
-
-
-  it "historical rates" do
-    # Make sure there are historical Rates avail for today.
-    writer_src
-    writer_src2
-    
-    # Force Historical Rate Source.
-    source = Exchange::Rate::Source::Historical.new
-    deriver = Exchange::Rate::Deriver.new(:source => source)
-    Exchange::Rate::Source.default = deriver
-
-    rates = source.get_raw_rates.should_not == nil
-     rates.empty?.should_not == true
-    # $stderr.puts "historical rates = #{rates.inspect}"
-
-    rates = source.get_rates.should_not == nil
-     rates.empty?.should_not == true
-    # $stderr.puts "historical rates = #{rates.inspect}"
-    
-    m_usd = ::Currency.Money('1234.56', :USD, :now).should_not == nil
-    # $stderr.puts "m_usd = #{m_usd.to_s(:code => true)}"
-    m_eur = m_usd.convert(:EUR).should_not == nil
-    # $stderr.puts "m_eur = #{m_eur.to_s(:code => true)}"
-
-  end
-
-
+  
   def assert_h_rates(rates, writer = nil)
-    hr0 = rates[0].should_not == nil
+    hr0 = rates[0]
+    hr0.should_not be_nil
     rates.each do | hr |
       found_hr = nil
       begin
-        found_hr = hr.find_matching_this(:first).should_not == nil
+        found_hr = hr.find_matching_this(:first)
+        found_hr.should_not be_nil
       rescue Object => err
         raise "#{hr.inspect}: #{err}:\n#{err.backtrace.inspect}"
       end
-
-      hr0.should_not == nil
-
-      hr.date.should == hr0.date
-      hr.date_0.should == hr0.date_0
-      hr.date_1.should == hr0.date_1
-      hr.source.should == hr0.source
-
       assert_equal_rate(hr, found_hr)
       assert_rate_defaults(hr, writer)
+
+      hr.instance_eval do
+        date.should    ==  hr0.date
+        date_0.should  ==  hr0.date_0
+        date_1.should  ==  hr0.date_1
+        source.should  ==  hr0.source
+      end
     end
   end
 
-
   def assert_equal_rate(hr0, hr)
+    tollerance = 0.00001
     hr.c1.to_s.should == hr0.c1.to_s
     hr.c2.to_s.should == hr0.c2.to_s
     hr.source.should == hr0.source
-    assert_equal_float hr0.rate, hr.rate
-    assert_equal_float hr0.rate_avg, hr.rate_avg
-    hr.rate_samples.should == hr0.rate_samples
-    assert_equal_float hr0.rate_lo, hr.rate_lo
-    assert_equal_float hr0.rate_hi, hr.rate_hi
-    assert_equal_float hr0.rate_date_0, hr.rate_date_0
-    assert_equal_float hr0.rate_date_1, hr.rate_date_1
-    hr.date.should == hr0.date
-    hr.date_0.should == hr0.date_0
-    hr.date_1.should == hr0.date_1
-    hr.derived.should == hr0.derived
+    
+    hr0.rate.should be_close(hr.rate, tollerance)
+    hr0.rate_avg.should be_close(hr.rate_avg, tollerance)
+    hr0.rate_samples.should == hr.rate_samples.should
+    
+    hr0.rate_lo.should be_close(hr.rate_lo, tollerance)
+    hr0.rate_hi.should be_close(hr.rate_hi, tollerance)
+    hr0.rate_date_0.should be_close(hr.rate_date_0, tollerance)
+    hr0.rate_date_1.should be_close(hr.rate_date_1, tollerance)
+    
+    hr0.date.should == hr.date
+    hr0.date_0.should == hr.date_0
+    hr0.date_1.should == hr.date_1
+    hr0.derived.should == hr.derived
   end
-
 
   def assert_rate_defaults(hr, writer)
-    hr.source if writer.should == writer.source.name
-    hr.rate_avg.should == hr.rate
-    1.should == hr.rate_samples
-    hr.rate_lo.should == hr.rate
-    hr.rate_hi.should == hr.rate
-    hr.rate_date_0.should == hr.rate
-    hr.rate_date_1.should == hr.rate
+    hr.source.should        ==  writer.source.name
+    hr.rate_avg.should      ==  hr.rate
+    hr.rate_samples.should  ==  1
+    hr.rate_lo.should       ==  hr.rate
+    hr.rate_hi.should       ==  hr.rate
+    hr.rate_date_0.should   ==  hr.rate
+    hr.rate_date_1.should   ==  hr.rate
   end
-
-
-  def assert_equal_float(x1, x2, eps = 0.00001)
-    eps = (x1 * eps).abs
-    assert((x1 - eps) <= x2)
-    assert((x1 + eps) >= x2)
-  end
-
 
 end
-
-end # module
-
