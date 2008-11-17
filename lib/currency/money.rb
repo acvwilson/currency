@@ -48,16 +48,13 @@ class Currency::Money
     # See #Money_rep(currency) mixin.
     #
     def initialize(x, currency = nil, time = nil)
-      opts ||= @@empty_hash
-
-      # Set ivars.
-      currency = ::Currency::Currency.get(currency)
-      @currency = currency
+      @currency = ::Currency::Currency.get(currency)
       @time = time || ::Currency::Money.default_time
       @time = ::Currency::Money.now if @time == :now
+      
       if x.kind_of?(String)
-        if currency
-          m = currency.parser_or_default.parse(x, :currency => currency)
+        if @currency
+          m = @currency.parser_or_default.parse(x, :currency => @currency)
         else
           m = ::Currency::Parser.default.parse(x)
         end
@@ -237,8 +234,6 @@ class Currency::Money
 
     # Formats the Money value as a String.
     def to_s(*opt)
-      # raise "huh: #{opt.inspect}"
-      
       @currency.format(self, *opt)
     end
 

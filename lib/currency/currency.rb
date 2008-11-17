@@ -44,14 +44,11 @@ class Currency::Currency
 
     # Create a new currency.
     # This should only be called from Currency::Currency::Factory.
-    def initialize(code, symbol = nil, scale = 1000000)
+    # def initialize(code, symbol = nil, scale = 1000000)
+    def initialize(code, symbol = nil, scale = Currency::Config.current.scale)
       self.code = code
       self.symbol = symbol
       self.scale = scale
-
-      @formatter =
-        @parser = 
-        nil
     end
 
 

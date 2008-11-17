@@ -48,14 +48,14 @@ describe "HistoricalWriter" do
     writer
   end
   
-  it "does stuff with a Xe writer" do
+  it "can read, parse and write XE data" do
     writer = setup_writer(@xe_src)
     rates = writer.write_rates
     rates.size.should == 12
     assert_h_rates(rates, writer)
   end
   
-  it "does stuff with NewYorkFed (will fail on weekends)" do
+  it "can read, parse and write NewYorkFed data (will fail on weekends)" do
     if @fed_src.available?
       writer = setup_writer(@fed_src)
       rates = writer.write_rates

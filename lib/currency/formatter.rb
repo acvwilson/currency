@@ -293,8 +293,6 @@ class Currency::Formatter
   #     => "1,234,567.89 USD"
   #
   def format(m, opt = @@empty_hash)
-    # raise "huh: #{opt.inspect}"
-    
     fmt = self
 
     unless opt.empty? 

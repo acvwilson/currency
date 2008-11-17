@@ -22,8 +22,49 @@ describe Currency::Config do
     end
 
   end
+  
+  describe "the scale expression is configurable" do
+    before(:all) do
+      @config = Currency::Config.new
+    end
+    
+    before(:each) do
+      Currency::Config.current = nil
+      Currency::Config.send(:class_variable_set, "@@default", nil)
+    end
+    
+    it "should have a scale_exp setter" do
+      Currency::Config.current.should respond_to(:scale_exp=)
+    end
+    
+    it "has a 'scale' reader" do
+      Currency::Config.current.should respond_to(:scale)
+    end
+    
+    it "uses the scale reader from the config when creating new Money object" do
+      Currency::Config.should_receive(:current).and_return(@config)
+      @config.should_receive(:scale).and_return(100)
+      10.money
+    end
+    
+    it "can be configured using a block" do
+      Currency::Config.configure do |config|
+        config.scale_exp = 6
+      end
 
-end # class
+      10.money.currency.scale_exp.should == 6
+      
+      Currency::Config.configure do |config|
+        config.scale_exp = 4
+      end
+      10.money.currency.scale_exp.should == 4
+    end
+    
+    it "can be configured using straight setters" do
+      10.money(:USD).currency.scale_exp.should == 2
+      Currency::Config.current.scale_exp = 6
+      10.money(:USD).currency.scale_exp.should == 6
+    end
+  end
 
-
-
+end
