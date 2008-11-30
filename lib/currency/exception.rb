@@ -6,7 +6,7 @@ module Currency::Exception
     #
     #   raise Currency::Exception [ "msg", :opt1, 1, :opt2, 2 ]
     #
-    class Base < ::Exception
+    class Base < ::StandardError
       EMPTY_HASH = { }.freeze
 
       def initialize(arg1, *args)
