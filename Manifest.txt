@@ -15,7 +15,6 @@ lib/currency/config.rb
 lib/currency/core_extensions.rb
 lib/currency/currency.rb
 lib/currency/currency/factory.rb
-lib/currency/currency_version.rb
 lib/currency/exception.rb
 lib/currency/exchange.rb
 lib/currency/exchange/rate.rb

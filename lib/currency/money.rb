@@ -58,9 +58,9 @@ class Currency::Money
         else
           m = ::Currency::Parser.default.parse(x)
         end
-        @currency = m.currency unless @currency
-        @time = m.time if m.time
-        @rep = m.rep
+        @currency = m.currency if m && !@currency
+        @time = m.time if m && m.time
+        @rep = m.nil?? 0 : m.rep 
       else
         @currency = ::Currency::Currency.default unless @currency
         @rep = x.Money_rep(@currency)

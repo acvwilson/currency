@@ -46,6 +46,8 @@ class Currency::Parser
 
 
   def _parse(str) # :nodoc:
+    return nil if str.to_s.strip == ''
+
     x = str
 
     # Get currency.
@@ -70,6 +72,7 @@ class Currency::Parser
       end
       x = md.pre_match + md.post_match
     end
+
     # Default time
     time ||= @time
     time = Time.new if time == :now
@@ -108,35 +111,35 @@ class Currency::Parser
     if md = /^([-+]?\d+)\.?$/.match(x)
       # $stderr.puts "'#{self}'.parse(#{str}) => EXACT"
       x = ::Currency::Money.new_rep(md[1].to_i * currency.scale, currency, @time)
-      
+
       # Match: fractional Currency value.
     elsif md = /^([-+]?)(\d*)\.(\d+)$/.match(x)
       sign = md[1]
       whole = md[2]
       part = md[3]
-      
+
       # $stderr.puts "'#{self}'.parse(#{str}) => DECIMAL (#{sign} #{whole} . #{part})"
-      
+
       if part.length != currency.scale
-        
+
         # Pad decimal places with additional '0'
         while part.length < currency.scale_exp
           part << '0'
         end
-        
+
         # Truncate to Currency's decimal size. 
         part = part[0 ... currency.scale_exp]
-        
+
         # $stderr.puts "  => INEXACT DECIMAL '#{whole}'"
       end
-      
+
       # Put the string back together:
       #   #{sign}#{whole}#{part}
       whole = sign + whole + part
       # $stderr.puts "  => REP = #{whole}"
-      
+
       x = whole.to_i
-      
+
       x = ::Currency::Money.new_rep(x, currency, time)
     else
       # $stderr.puts "'#{self}'.parse(#{str}) => ??? '#{x}'"

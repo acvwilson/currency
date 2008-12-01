@@ -118,13 +118,13 @@ module Currency
   #
   # See Money#new.
   def self.Money(*opts)
+    return nil if opts.to_s.strip == ''
     Money.new(*opts)
   end
 end
 
 $:.unshift(File.expand_path(File.dirname(__FILE__))) unless $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
-require 'currency/currency_version'
 require 'currency/config'
 require 'currency/exception'
 require 'currency/money'

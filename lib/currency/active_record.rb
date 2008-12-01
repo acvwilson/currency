@@ -139,7 +139,7 @@ module Currency::ActiveRecord
         attr_name = attr_name.to_s
         opts[:class] = self
         opts[:table] = self.table_name
-        opts[:attr_name] = attr_name.intern
+        opts[:attr_name] = attr_name.to_sym
         ::ActiveRecord::Base.register_money_attribute(opts)
 
         column = opts[:column] || opts[:attr_name]
@@ -204,7 +204,6 @@ end_eval
         validate << "\nvalidates_numericality_of :#{attr_name}#{validate_allow_nil}\n"
         validate << "\nvalidates_format_of :#{currency_column}, :with => /^[A-Z][A-Z][A-Z]$/#{validate_allow_nil}\n" if currency_column
 
- 
         alias_accessor ||= ''
 
         module_eval (opts[:module_eval] = x = <<-"end_eval"), __FILE__, __LINE__
@@ -225,7 +224,7 @@ def #{attr_name}
 end
 
 def #{attr_name}=(value)
-  if value.nil?
+  if value.nil? || value.to_s.strip == ''
     #{attr_name}_money = nil
   elsif value.kind_of?(Integer) || value.kind_of?(String) || value.kind_of?(Float)
     #{attr_name}_money = ::Currency::Money(value, #{currency})
@@ -238,7 +237,7 @@ def #{attr_name}=(value)
     raise ::Currency::Exception::InvalidMoneyValue, value
   end
 
-  @#{attr_name} = #{attr_name}_money
+  @#{attr_name} = #{attr_name}_money # TODO: Really needed? Isn't the write_attribute enough?
   
   write_attribute(:#{column}, #{attr_name}_money.nil? ? nil : #{money_rep})
   #{write_time}

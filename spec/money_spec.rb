@@ -3,14 +3,33 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe Currency::Money do
 
-  it "create" do
+  before :all do
+    Currency::Config.configure do |config|
+      config.scale_exp = 6
+    end
+    
+  end
+
+  def zero_money
+    @zero_money ||= Currency::Money.new(0)
+  end
+  
+  def negative_money
+    @negative_money ||= Currency::Money.new(-1.00, :USD)
+  end
+  
+  def positive_money
+    @positive_money ||= Currency::Money.new(2.99, :USD)
+  end
+
+  it "creates Monies" do
     m = Currency::Money.new(1.99)
     m.should be_kind_of(Currency::Money) 
     Currency::Currency.default.should == m.currency
     :USD.should == m.currency.code
   end
 
-  describe "object money method" do
+  describe "Converts different objects to Money with the 'money' method" do
     it "works with a float" do
       m = 1.99.money(:USD)
       m.should be_kind_of(Currency::Money)
@@ -38,45 +57,46 @@ describe Currency::Money do
       :EUR.should == m.currency.code
       m.rep.should == 45990000
     end
+    
+    describe "deals with voids" do
+      it "does not raise with an empty string" do
+        lambda{
+          Currency::Money.new('')
+        }.should_not raise_error
+      end
+      
+      it "considers the empty string to be nil " do
+        Currency::Money.new('').should be_nil
+      end
+    end
   end
 
-  def zero_money
-    @zero_money ||= Currency::Money.new(0)
-  end
-  
-  it "zero" do
+  it "deals with zero in the least surprising way" do
     zero_money.negative?.should_not == true
     zero_money.zero?.should_not == nil
     zero_money.positive?.should_not == true
   end
   
-  def negative_money
-    @negative_money ||= Currency::Money.new(-1.00, :USD)
-  end
-  
-  it "negative" do
+  it "deals with negatives in the least surprising way" do
     negative_money.negative?.should_not == nil
     negative_money.zero?.should_not == true
     negative_money.positive?.should_not == true
   end
 
-  def positive_money
-    @positive_money ||= Currency::Money.new(2.99, :USD)
-  end
-  it "positive" do
+  it "deals with positive numbers in the least surprising way" do
     positive_money.negative?.should_not == true
     positive_money.zero?.should_not == true
     positive_money.positive?.should_not == nil
   end
 
-  it "relational" do
+  it "can do comparisons between monies" do
     n = negative_money
     z = zero_money
     p = positive_money
 
-    (n.should < p)
-     (n > p).should_not == true
-     (p < n).should_not == true
+    negative_money.should < positive_money
+    (negative_money > positive_money).should_not be_true
+    (positive_money < negative_money).should_not be_true
     (p.should > n)
     (p != n).should_not == nil
 
