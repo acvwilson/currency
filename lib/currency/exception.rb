@@ -52,7 +52,7 @@ module Currency::Exception
       end
 
       def to_s
-        super + ": #{@opts.inspect}"
+        "#{super}: #{@opts.inspect}"
       end
 
     end
