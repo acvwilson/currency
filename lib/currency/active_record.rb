@@ -203,6 +203,15 @@ end_eval
         validate = "# Validation\n"
         validate << "\nvalidates_numericality_of :#{attr_name}#{validate_allow_nil}\n"
         validate << "\nvalidates_format_of :#{currency_column}, :with => /^[A-Z][A-Z][A-Z]$/#{validate_allow_nil}\n" if currency_column
+        # validate << "\nbefore_validation :debug_#{attr_name}_before_validate\n"
+        # 
+        # validate << %Q{
+        #   def debug_#{attr_name}_before_validate
+        #     logger.debug "\tValidating #{attr_name}. Allow nils? #{validate_allow_nil}"
+        #     logger.debug "\t\t'#{attr_name}': '\#\{#{attr_name}.inspect\}' (class: '\#\{#{attr_name}.class\}')"
+        #     logger.debug "\t\tcurrency column, '#{currency_column}': '\#\{#{currency_column}.inspect\}' (class: '\#\{#{currency_column}.class\}'), matches '/^[A-Z][A-Z][A-Z]$/': \#\{'#{currency_column}'.match(/^[A-Z][A-Z][A-Z]$/).to_a.inspect\}"
+        #   end
+        # }
 
         alias_accessor ||= ''
 
@@ -246,13 +255,38 @@ def #{attr_name}=(value)
 end
 
 def #{attr_name}_before_type_cast
-  # FIXME: User cannot specify Currency
-  x = #{attr_name}
-  x &&= x.format(:symbol => false, :currency => false, :thousands => false)
-  x
+  #{attr_name}.to_f if #{attr_name}
 end
 
 end_eval
+=begin
+          Replaced the _before_type_cast because it's buggy and weird:
+
+          Bug:    if the Currency::Formatter.default is set to include the currency code (:code => true) then the
+                  call below to format() will leave the code in. When the validates_numericality_of kicks in it 
+                  can't cast to Float (yes, validates_numericality_of basically does just that) because of the "USD"
+                  of the currency code and everything fails. All the time.
+    
+          Weird:  assigning to "x" doesn't really make any sense, just useless overhead. Using the rare &&= is not a big 
+                  win over something like:
+                    x && x.format(..., ...)
+                  and actually longer too.
+                  The intention of the _before_type_cast method is to return a raw, unformatted value.
+                  When it does work, it returns a string on the form "123.456". Why not cast to Float right away?
+                  Arguably, the "raw" currency value is the integer rep stored in the db, but that wouldn't work
+                  very well with any known rails validations. I think casting to Float is reasonable.
+                  The taste Kurt Stephens has for weird Ruby code never ceases to amaze me. 
+      
+                  :)
+                  (dvd, 05-02-2009)
+          def #{attr_name}_before_type_cast
+            # FIXME: User cannot specify Currency
+            x = #{attr_name}
+            x &&= x.format(:symbol => false, :currency => false, :thousands => false)
+            x
+          end
+=end
+
         # $stderr.puts "   CODE = #{x}"
       end
     end

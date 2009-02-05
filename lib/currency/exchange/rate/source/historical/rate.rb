@@ -175,6 +175,7 @@ class Currency::Exchange::Rate::Source::Historical::Rate < ::ActiveRecord::Base
 
    # Shorthand.
    def find_matching_this(opt1 = :all, *opts)
+     # FIXME: this breaks somehow in Ruby 1.9 Not sure why. (dvd, 04-02-2009)
      self.class.find(opt1, :conditions => find_matching_this_conditions, *opts)
    end
 
