@@ -130,7 +130,7 @@ require 'currency/exception'
 require 'currency/money'
 require 'currency/currency'
 require 'currency/currency/factory'
-require 'currency/money'
+require 'currency/money'  # TODO: Why require this twice? (dvd, 15-03-2009)
 require 'currency/parser'
 require 'currency/formatter' # require this one before the parser and enjoy the weird bugs!
 require 'currency/exchange'
