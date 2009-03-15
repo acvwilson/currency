@@ -1,0 +1,10 @@
+sqlite3mem:
+  :adapter: sqlite3
+  :dbfile: ":memory:"
+
+mysql_debug:
+  adapter: mysql
+  database: currency_gem_test
+  username: root
+  socket: /opt/local/var/run/mysql5/mysqld.sock
+  encoding: utf8
