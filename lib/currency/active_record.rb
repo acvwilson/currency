@@ -145,27 +145,29 @@ module Currency::ActiveRecord
         column = opts[:column] || opts[:attr_name]
         opts[:column] = column
 
+        # TODO: rewrite with define_method (dvd, 15-03-2009)
         if column.to_s != attr_name.to_s
           alias_accessor = <<-"end_eval"
-alias :before_money_#{column}=, :#{column}=
+            alias :before_money_#{column}=, :#{column}=
 
-def #{column}=(__value)
-  @{attr_name} = nil # uncache
-  before_money#{column} = __value
-end
-
+            def #{column}=(__value)
+              @{attr_name} = nil # uncache
+              before_money#{column} = __value
+            end
 end_eval
-        end
 
+        end
+        alias_accessor ||= ''
+        
         currency = opts[:currency]
 
         currency_column = opts[:currency_column]
         if currency_column && ! currency_column.kind_of?(String)
-          currency_column = currency_column.to_s
           currency_column = "#{column}_currency"
         end
+
         if currency_column
-          read_currency = "read_attribute(:#{currency_column.to_s})"
+          read_currency = "read_attribute(:#{currency_column})"
           write_currency = "write_attribute(:#{currency_column}, #{attr_name}_money.nil? ? nil : #{attr_name}_money.currency.code.to_s)"
         end
         opts[:currency_column] = currency_column
@@ -187,6 +189,7 @@ end_eval
           read_time = "self.#{time}"
         end
         opts[:time] = time
+
         if opts[:time_update]
           write_time = "self.#{time} = #{attr_name}_money && #{attr_name}_money.time"
         end
@@ -201,63 +204,66 @@ end_eval
 
         validate_allow_nil = opts[:allow_nil] ? ', :allow_nil => true' : ''
         validate = "# Validation\n"
-        validate << "\nvalidates_numericality_of :#{attr_name}#{validate_allow_nil}\n"
+        validate << "\nvalidates_numericality_of :#{attr_name} #{validate_allow_nil}\n"
         validate << "\nvalidates_format_of :#{currency_column}, :with => /^[A-Z][A-Z][A-Z]$/#{validate_allow_nil}\n" if currency_column
-        # validate << "\nbefore_validation :debug_#{attr_name}_before_validate\n"
-        # 
-        # validate << %Q{
-        #   def debug_#{attr_name}_before_validate
-        #     logger.debug "\tValidating #{attr_name}. Allow nils? #{validate_allow_nil}"
-        #     logger.debug "\t\t'#{attr_name}': '\#\{#{attr_name}.inspect\}' (class: '\#\{#{attr_name}.class\}')"
-        #     logger.debug "\t\tcurrency column, '#{currency_column}': '\#\{#{currency_column}.inspect\}' (class: '\#\{#{currency_column}.class\}'), matches '/^[A-Z][A-Z][A-Z]$/': \#\{'#{currency_column}'.match(/^[A-Z][A-Z][A-Z]$/).to_a.inspect\}"
-        #   end
-        # }
+        
+        # =================================================================================================
+        # = Define the currency_column setter, so that the Money object changes when the currency changes =
+        # =================================================================================================
+        if currency_column
+          currency_column_setter = %Q{
+            def #{currency_column}=(currency_code)
+              @#{attr_name} = nil
+              write_attribute(:#{currency_column}, currency_code)
+            end
+          }
+          class_eval currency_column_setter, __FILE__, __LINE__
+        end
+        
+        class_eval (opts[:module_eval] = x = <<-"end_eval"), __FILE__, __LINE__
+          #{validate}
 
-        alias_accessor ||= ''
+          #{alias_accessor}
 
-        module_eval (opts[:module_eval] = x = <<-"end_eval"), __FILE__, __LINE__
-#{validate}
+          # Getter
+          def #{attr_name}
+            unless @#{attr_name}
+              rep = read_attribute(:#{column})
+              unless rep.nil?
+                @#{attr_name} = ::Currency::Money.new_rep(rep, #{read_currency} || #{currency}, #{read_time} || #{time})
+                #{read_preferred_currency}
+              end
+            end
+            @#{attr_name}
+          end
+          
+          # Setter
+          def #{attr_name}=(value)
+            if value.nil? || value.to_s.strip == ''
+              #{attr_name}_money = nil
+            elsif value.kind_of?(Integer) || value.kind_of?(String) || value.kind_of?(Float)
+              #{attr_name}_money = ::Currency::Money(value, #{read_currency})
+              #{write_preferred_currency}
+            elsif value.kind_of?(::Currency::Money)
+              #{attr_name}_money = value
+              #{write_preferred_currency}
+              #{write_currency ? write_currency : "#{attr_name}_money = #{attr_name}_money.convert(#{currency})"}
+            else
+              raise ::Currency::Exception::InvalidMoneyValue, value
+            end
 
-#{alias_accessor}
-
-def #{attr_name}
-  # $stderr.puts "  \#{self.class.name}##{attr_name}"
-  unless @#{attr_name}
-    #{attr_name}_rep = read_attribute(:#{column})
-    unless #{attr_name}_rep.nil?
-      @#{attr_name} = ::Currency::Money.new_rep(#{attr_name}_rep, #{read_currency} || #{currency}, #{read_time} || #{time})
-      #{read_preferred_currency}
-    end
-  end
-  @#{attr_name}
-end
-
-def #{attr_name}=(value)
-  if value.nil? || value.to_s.strip == ''
-    #{attr_name}_money = nil
-  elsif value.kind_of?(Integer) || value.kind_of?(String) || value.kind_of?(Float)
-    #{attr_name}_money = ::Currency::Money(value, #{currency})
-    #{write_preferred_currency}
-  elsif value.kind_of?(::Currency::Money)
-    #{attr_name}_money = value
-    #{write_preferred_currency}
-    #{write_currency ? write_currency : "#{attr_name}_money = #{attr_name}_money.convert(#{currency})"}
-  else
-    raise ::Currency::Exception::InvalidMoneyValue, value
-  end
-
-  @#{attr_name} = #{attr_name}_money # TODO: Really needed? Isn't the write_attribute enough?
+            @#{attr_name} = #{attr_name}_money # TODO: Really needed? Isn't the write_attribute enough? (answer: no, because the getter method does an "if @#{attr_name}" to check if it's set)
   
-  write_attribute(:#{column}, #{attr_name}_money.nil? ? nil : #{money_rep})
-  #{write_time}
+            write_attribute(:#{column}, #{attr_name}_money.nil? ? nil : #{attr_name}_money.rep)
+            #{write_time}
 
-  value
-end
+            value
+          end
 
-def #{attr_name}_before_type_cast
-  #{attr_name}.to_f if #{attr_name}
-end
-
+          def #{attr_name}_before_type_cast
+            #{attr_name}.to_f if #{attr_name}
+          end
+          
 end_eval
 =begin
           Replaced the _before_type_cast because it's buggy and weird:

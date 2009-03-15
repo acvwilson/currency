@@ -8,6 +8,42 @@ require 'active_record'
 require 'active_record/migration'
 require File.dirname(__FILE__) + '/../lib/currency/active_record'
 
+config = YAML::load(IO.read(File.dirname(__FILE__) + '/db/database.yml'))
+ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
+# ActiveRecord::Base.establish_connection(config['mysql_debug'])
+ActiveRecord::Base.establish_connection(config['sqlite3mem'])
+
+ActiveRecord::Migration.verbose = false
+load(File.dirname(__FILE__) + "/db/schema.rb")
+
+# ============================================
+# = Load some currency symbols (171 records) =
+# ============================================
+currency_codes = IO.read(File.dirname(__FILE__) + '/db/currency_codes.sql')
+currency_codes.each_line do |sql_insert|
+  ActiveRecord::Base.connection.execute(sql_insert)
+end
+
+# ================================
+# = Load some rates (84 records) =
+# ================================
+rates = IO.read(File.dirname(__FILE__) + '/db/currency_historical_rates.sql')
+rates.each_line do |sql_insert|
+  ActiveRecord::Base.connection.execute(sql_insert)
+end
+
+AR_M = ActiveRecord::Migration
+AR_B = ActiveRecord::Base
+
+
+
+=begin
+require File.dirname(__FILE__) + '/spec_helper'
+
+require 'active_record'
+require 'active_record/migration'
+require File.dirname(__FILE__) + '/../lib/currency/active_record'
+
 AR_M = ActiveRecord::Migration
 AR_B = ActiveRecord::Base
 
@@ -125,3 +161,4 @@ def assert_equal_currency(a,b)
   b.amount.currency.code.should == a.amount.currency.code
 
 end
+=end
