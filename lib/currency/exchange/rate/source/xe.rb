@@ -5,6 +5,7 @@ require 'currency/exchange/rate/source/base'
 
 require 'net/http'
 require 'open-uri'
+require 'hpricot'
 # Cant use REXML because of missing </form> tags -- 2007/03/11
 # require 'rexml/document'
 
@@ -52,56 +53,42 @@ class Currency::Exchange::Rate::Source::Xe < ::Currency::Exchange::Rate::Source:
   def parse_page_rates(data = nil)
     data = get_page_content unless data
 
-    @lines = data = data.split(/\n/);
+     doc = Hpricot(data)
 
-    # xe.com no longer gives date/time.
-    # Remove usecs.
-    time = Time.at(Time.new.to_i).getutc
-    @rate_timestamp = time
+     # xe.com no longer gives date/time.
+     # Remove usecs.
 
-    eat_lines_until /More currencies\.\.\.<\/a>/i
-    eat_lines_until /^\s*<tr>/i
-    eat_lines_until /^\s*<tr>/i
-    
-    # Read first table row to get position for each currency
-    currency = [ ]
-    eat_lines_until /^\s*<\/tr>/i do 
-      if md = /<td[^>]+?>.*?\/> ([A-Z][A-Z][A-Z])<\/td>/.match(@line)
-        cur = md[1].intern
-        cur_i = currency.size
-        currency.push(cur)
-        $stderr.puts "Found currency header: #{cur.inspect} at #{cur_i}" if @verbose
-      end
-    end
-    raise ParserError, "Currencies header not found" if currency.empty?
-    
+     time = Time.at(Time.new.to_i).getutc
+     @rate_timestamp = time
 
-    # Skip until "1 USD ="
-    eat_lines_until /^\s*<td[^>]+?> 1&nbsp;+USD&nbsp;=/
-     
-    # Read first row of 1 USD = ...
-    rate = { }
-    cur_i = -1 
-    eat_lines_until /^\s*<\/tr>/i do 
-      # Grok:
-      #
-      #   <td align="center" class="cur2 currencyA">114.676</td>\n
-      #
-      # AND
-      #
-      #   <td align="center" class="cur2 currencyA"><div id="positionImage">0.9502\n
-      #
-      if md = /<td[^>]+?>\s*(<div[^>]+?>\s*)?(\d+\.\d+)\s*(<\/td>)?/i.match(@line)
-        usd_to_cur = md[2].to_f
-        cur_i = cur_i + 1
-        cur = currency[cur_i]
-        raise ParserError, "Currency not found at column #{cur_i}" unless cur
-        next if cur.to_s == PIVOT_CURRENCY.to_s
-        (rate[PIVOT_CURRENCY] ||= {})[cur] = usd_to_cur
-        (rate[cur] ||= { })[PIVOT_CURRENCY] ||= 1.0 / usd_to_cur
-        $stderr.puts "#{cur.inspect} => #{usd_to_cur}" if @verbose
-      end
-    end
+     # parse out the currency names in the table
+     currency = [ ]
+     doc.search("table.currency tr:first-child .c1").each do |td|
+       currency.push(td.inner_text.strip.upcase.intern)
+     end
+     $stderr.puts "Found currencies: #{currency.inspect}" if @verbose
+     raise ParserError, "Currencies header not found" if currency.empty?
+
+     # Parse out the actual rates, dealing with the explanation gunk about which currency is worth more
+     parsed_rates = doc.search("table.currency tr:nth-child(0) .c2, table.currency tr:nth-child(0) .cLast").map do |e|
+       if (inner = e.search('div.aboveLayer')).size > 0
+         inner.inner_text.strip
+       else
+         e.inner_text.strip
+       end
+     end
+
+     rate = { }
+
+     parsed_rates.each_with_index do |parsed_rate, i|
+       usd_to_cur = parsed_rate.to_f
+       cur = currency[i]
+       raise ParserError, "Currency not found at column #{i}" unless cur
+       next if cur.to_s == PIVOT_CURRENCY.to_s
+       (rate[PIVOT_CURRENCY] ||= {})[cur] = usd_to_cur
+       (rate[cur] ||= { })[PIVOT_CURRENCY] ||= 1.0 / usd_to_cur
+       $stderr.puts "#{cur.inspect} => #{usd_to_cur}" if @verbose      
+     end
 
     raise ::Currency::Exception::UnavailableRates, "No rates found in #{get_uri.inspect}" if rate.keys.empty?
 
