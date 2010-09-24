@@ -62,21 +62,13 @@ class Currency::Exchange::Rate::Source::Xe < ::Currency::Exchange::Rate::Source:
      @rate_timestamp = time
 
      # parse out the currency names in the table
-     currency = [ ]
-     doc.search("table.currency tr:first-child .c1").each do |td|
-       currency.push(td.inner_text.strip.upcase.intern)
-     end
+     currency = doc.search("table.chart tr:first-child .flagtext").map {|td| td.inner_text.strip.upcase.intern}
      $stderr.puts "Found currencies: #{currency.inspect}" if @verbose
      raise ParserError, "Currencies header not found" if currency.empty?
 
      # Parse out the actual rates, dealing with the explanation gunk about which currency is worth more
-     parsed_rates = doc.search("table.currency tr:nth-child(0) .c2, table.currency tr:nth-child(0) .cLast").map do |e|
-       if (inner = e.search('div.aboveLayer')).size > 0
-         inner.inner_text.strip
-       else
-         e.inner_text.strip
-       end
-     end
+     parsed_rates = doc.search("table.chart tr:nth-child(2) td a")[2..-1].map {|n| n.inner_text}
+     parsed_rates = ["1.00"] + parsed_rates.values_at(* parsed_rates.each_index.select {|i| i.even?})
 
      rate = { }
 
